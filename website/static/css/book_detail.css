@@ -1,0 +1,24 @@
+.btn-read {
+    border: 0;
+    color: #fff;
+    background-color: var(--color-primary);
+}
+
+.btn-dowload {
+    border: 0;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.button {
+    font-size: 25px;
+    line-height: 50px;
+    width: 200px;
+    height:50px;
+    border-radius: 0;
+}
+
+.button:hover {
+    background-color: #fff;
+    color: var(--color-primary);
+}

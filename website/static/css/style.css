@@ -1,0 +1,98 @@
+:root {
+    --bg-main: #178ae2c6;
+    --color-primary:#0a67af;
+    --bg-book: #665e43;
+    --bg-dash: #4e72dfe7;
+}
+html {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.w-1050 {
+    width: 1050px;
+}
+
+.p-10 {
+    padding: 10px 0 !important;
+}
+.h-100 {
+    height: 100vh !important;
+}
+a {
+    color: #000;
+    text-decoration: none;
+}
+
+.w-18 {
+    width: 18%;
+}
+
+.bg-parent {
+    background-color: transparent !important;
+}
+
+.text-main {
+    color: var(--color-primary);
+}
+.bg-dash {
+    background-color: var(--bg-dash);
+}
+.bg-main {
+    background-color: var(--bg-main);
+}
+
+.bg-book {
+    background-color: var(--bg-book);
+}
+
+header {
+    color: #fff;
+}
+
+.bg-overlay {
+    height: 400px;
+    background-image: url('../images/bg-home.jpg');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+.text-overlay {
+    font-size: 5rem;
+    font-weight: bold;
+}
+
+.title {
+    color: var(--color-primary);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.book:hover .title {
+    text-decoration: underline;
+}
+
+.card-img-overlay {
+    background: linear-gradient(145deg, #000, transparent);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.bg-title {
+    height: 150px;
+    background-image: url(../images/bg-white.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    h1 {
+        font-size: 3rem;
+    }
+}
+
+.bg-login{
+    background-image: url(../images/auth.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
