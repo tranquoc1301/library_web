@@ -1,0 +1,70 @@
+/* Header Background and Container */
+.container-fluid {
+  padding: 0; /* Removes padding for full-width */
+}
+header .navbar {
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: rgba(33, 150, 243, 0.95);
+  width: 100vw; /* Full width */
+}
+
+/* Brand Logo */
+.navbar-brand {
+  color: #ffffff;
+  font-weight: bold;
+}
+.navbar-brand img {
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+/* Navbar Links */
+.nav-link {
+  padding: 8px 15px;
+  text-transform: uppercase;
+  color: #ffffff;
+  font-weight: 500;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  margin-right: 8px;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-radius: 8px;
+}
+
+/* Search Bar */
+.form-control {
+  max-width: 250px;
+  padding-right: 40px;
+  background-color: #f1f8ff;
+  border: 1px solid #0d47a1;
+  transition: box-shadow 0.3s ease;
+}
+.btn i {
+  color: #ffffff;
+}
+
+/* Login and Register Buttons */
+.btn-login {
+  background-color: #42a5f5;
+  color: white;
+  border: none;
+  transition: background-color 0.3s;
+}
+.btn-login:hover {
+  background-color: #0d47a1;
+}
+.btn-register {
+  border-color: #ffffff;
+  color: #ffffff;
+  transition: all 0.3s;
+}
+.btn-register:hover {
+  background-color: #ffffff;
+  color: #42a5f5;
+}

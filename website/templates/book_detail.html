@@ -12,39 +12,53 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="css/book_detail.css" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/book_detail.css') }}"
+    />
   </head>
   <body>
-    <div id="header"></div>
+    {% include 'header.html' %}
 
     <main>
       <div class="container d-flex bg-book text-light p-5">
         <div>
-          <img src="" alt="Book Cover" width="310px" height="450px" />
+          <img
+            src="{{ url_for('static', filename=book.cover) }}"
+            alt="Book Cover"
+            width="310px"
+            height="450px"
+          />
         </div>
         <div class="ps-4">
-          <h2 class="title"></h2>
+          <h2 class="title">{{ book.title }}</h2>
           <p>
-            <span class="opacity-75">Author: </span><span class="author"></span>
+            <span class="opacity-75">Author: </span
+            ><span class="author">{{ book.author }}</span>
           </p>
           <p>
-            <span class="opacity-75">Year: </span><span class="year"></span>
+            <span class="opacity-75">Year: </span
+            ><span class="year">{{ book.year }}</span>
           </p>
           <p>
             <span class="opacity-75">Publisher: </span
-            ><span class="publisher"></span>
+            ><span class="publisher">{{ book.publisher }}</span>
           </p>
           <p>
             <span class="opacity-75">Summary: </span><br />
-            <span class="summary"></span>
+            <span class="summary">{{ book.summary }}</span>
           </p>
           <p>
             <span class="opacity-75">Category: &nbsp;</span>
             <a
-              href="category.html"
+              href="{{ url_for('views.category', category_id=book.category_id) }}"
               class="rounded-pill btn btn-outline-light px-5 category"
-            ></a>
+              >{{ book.category_name }}</a
+            >
           </p>
           <div>
             <button class="button btn-read me-3">Read online</button>
@@ -53,68 +67,21 @@
             </button>
           </div>
           <p class="opacity-75 mt-2">
-            <span
-              ><i class="fa-regular fa-eye"></i>
-              <span class="views">0</span> views</span
-            >
-            <span class="ms-3"
-              ><i class="fa-solid fa-download"></i>
-              <span class="downloads">0</span> downloads</span
-            >
+            <span>
+              <i class="fa-regular fa-eye"></i>
+              <span class="views">{{ book.view_count }}</span> views
+            </span>
+            <span class="ms-3">
+              <i class="fa-solid fa-download"></i>
+              <span class="downloads">{{ book.download_count }}</span> downloads
+            </span>
           </p>
         </div>
       </div>
     </main>
 
-    <div id="footer"></div>
+    {% include 'footer.html' %}
 
-    <script src="js/script.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const bookId = urlParams.get("id");
-
-        fetch(`http://127.0.0.1:5000/books/${bookId}`)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data) {
-              document.querySelector(
-                ".bg-book img"
-              ).src = `http://127.0.0.1:5000/${data.cover}`;
-              document.querySelector(".title").textContent = data.title;
-              document.querySelector(".author").textContent = data.author;
-              document.querySelector(".year").textContent = data.publish_year;
-              document.querySelector(".publisher").textContent = data.publisher;
-              document.querySelector(".summary").textContent = data.summary;
-              document.querySelector(".views").textContent = data.views || "0";
-              document.querySelector(".downloads").textContent =
-                data.downloads || "0";
-
-              fetch(`http://127.0.0.1:5000/categories/${data.category_id}`)
-                .then((categoryResponse) => categoryResponse.json())
-                .then((categoryData) => {
-                  const categoryLink = document.querySelector(".category");
-                  categoryLink.textContent = categoryData.category;
-                  categoryLink.href = `category.html?category=${encodeURIComponent(
-                    categoryData.name
-                  )}`;
-                })
-                .catch((categoryError) => {
-                  console.error("Error fetching category data:", categoryError);
-                  document.querySelector(".category").textContent =
-                    "Category not found";
-                });
-            } else {
-              document.querySelector("main").innerHTML =
-                "<p>Book not found.</p>";
-            }
-          })
-          .catch((error) => {
-            console.error("Error fetching book data:", error);
-            document.querySelector("main").innerHTML =
-              "<p>Error loading book data.</p>";
-          });
-      });
-    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>
 </html>

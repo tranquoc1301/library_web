@@ -127,3 +127,13 @@ def confirm_email(token):
     student.is_active = True
     db.session.commit()
     return render_template('mail_confirm_success.html'), 200
+
+
+@auth.route('/login', methods=['GET'])
+def login_page():
+    return render_template('login.html')
+
+
+@auth.route('/signup', methods=['GET'])
+def signup_page():
+    return render_template('signup.html')
