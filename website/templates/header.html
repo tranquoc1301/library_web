@@ -49,29 +49,30 @@
           </ul>
 
           <!-- Search Bar -->
-          <form class="d-flex position-relative">
-            <input
-              type="search"
-              placeholder="Search"
-              class="form-control me-2"
-            />
-            <button
-              type="submit"
-              class="btn position-absolute end-0 top-0 h-100 d-flex align-items-center px-3"
-            >
-              <i class="fa fa-search"></i>
-            </button>
-          </form>
+          <div class="search-bar-container">
+            <form action="{{ url_for('views.search_books') }}" method="get">
+              <input
+                type="search"
+                name="title"
+                class="form-control search-bar"
+                placeholder="Search..."
+                aria-label="Search"
+              />
+              <button class="btn search-btn" type="submit">
+                <i class="fa fa-search"></i>
+              </button>
+            </form>
+          </div>
 
           <!-- Login and Register Buttons -->
           <div class="d-flex ms-3">
             <a
-              href="{{ url_for('auth.login') }}"
+              href="{{ url_for('auth.login_page') }}"
               class="btn btn-login rounded-pill px-4 me-2"
               >Login</a
             >
             <a
-              href="{{ url_for('auth.signup') }}"
+              href="{{ url_for('auth.signup_page') }}"
               class="btn btn-register rounded-pill px-4"
               >Register</a
             >

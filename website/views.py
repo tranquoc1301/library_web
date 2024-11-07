@@ -13,6 +13,12 @@ def index():
     books = books[:6]
     categories = category_controllers.get_all_categories_service()
     categories = categories[:5]
+
+    categories_with_count = []
+    for category in categories:
+        category.book_count = len(
+            book_controllers.get_books_by_category_id_service(category.id))
+
     return render_template('index.html', books=books, categories=categories)
 
 
@@ -21,13 +27,33 @@ def books():
     books = book_controllers.get_all_books_service()
     return render_template('book.html', books=books)
 
+
 @views.route('/books/<int:book_id>', methods=['GET'])
 def book_detail(book_id):
     book = book_controllers.get_book_by_id_service(book_id)
-    book.category_name = category_controllers.get_category_by_id_service(book.category_id).category
+    book.category_name = category_controllers.get_category_by_id_service(
+        book.category_id).category
     return render_template('book_detail.html', book=book)
+
+
+@views.route('/books/search', methods=['GET'])
+def search_books():
+    title = request.args.get('title')
+    books = book_controllers.search_books_service(title)
+    return render_template("book.html", books=books)
+
+
+@views.route('/books/category/<int:category_id>', methods=['GET'])
+def books_by_category_id(category_id):
+    books = book_controllers.get_books_by_category_id_service(category_id)
+    return render_template('book.html', books=books)
+
 
 @views.route('/categories')
 def category():
     categories = category_controllers.get_all_categories_service()
+    for category in categories:
+        category.book_count = len(
+            book_controllers.get_books_by_category_id_service(category.id))
+
     return render_template('category.html', categories=categories)

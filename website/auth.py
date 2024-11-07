@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, url_for, render_template
+from flask import Blueprint, request, jsonify, url_for, render_template, redirect, session
 from flask_bcrypt import Bcrypt
 from flask_mail import Message, Mail
 from .db import db
@@ -9,9 +9,8 @@ import os
 from datetime import timedelta
 
 
-# Khởi tạo các thành phần
 bcrypt = Bcrypt()
-mail = Mail()  # Khởi tạo Mail
+mail = Mail()
 s = URLSafeTimedSerializer(os.environ.get('KEY'))
 auth = Blueprint('auth', __name__)
 
@@ -19,31 +18,38 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['POST'])
 def login():
     try:
-        # Lấy username và password từ JSON của request
-        username = request.json.get('username')
-        password = request.json.get('password')
+        # Lấy thông tin từ form
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-        # Truy vấn student từ DB
+        # Kiểm tra xem username và password có hợp lệ không
+        if not username or not password:
+            return jsonify({"error": "Username and password are required."}), 400
+
         student = Students.query.filter_by(username=username).first()
 
-        # Kiểm tra tồn tại, trạng thái hoạt động và xác thực mật khẩu
-        if student and bcrypt.check_password_hash(student.password, password):
-            # Tạo access token và refresh token
-            access_token = create_access_token(
-                identity=student.id, expires_delta=timedelta(hours=1))
-            refresh_token = create_refresh_token(identity=student.id)
+        if student:
+            # Kiểm tra tài khoản có bị khóa không
+            if not student.is_active:
+                return jsonify({"error": "Your account is not active. Please check your email to activate it."}), 403
 
-            return jsonify({
-                "message": "Login successful!",
-                "access_token": access_token,
-                "refresh_token": refresh_token,
-                "user": {
-                    "id": student.id,
-                    "fullname": student.fullname
-                }
-            }), 200
+            # Kiểm tra mật khẩu
+            if bcrypt.check_password_hash(student.password, password):
+                # Tạo access token và refresh token
+                access_token = create_access_token(
+                    identity=student.id, expires_delta=timedelta(hours=1))
+                refresh_token = create_refresh_token(identity=student.id)
 
-        return jsonify({"error": "Incorrect username or password, or the account is inactive."}), 401
+                # Lưu token vào session (nếu bạn sử dụng session để lưu token)
+                session['access_token'] = access_token
+
+                # Chuyển hướng đến trang chủ (index)
+                # Thay 'index' bằng tên của route trang chủ của bạn
+                return redirect(url_for('views.index'))
+            else:
+                return jsonify({"error": "Incorrect password."}), 401
+        else:
+            return jsonify({"error": "Username not found."}), 404
 
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
@@ -51,21 +57,21 @@ def login():
 
 @auth.route('/signup', methods=['POST'])
 def signup():
-    id = request.json.get('id')
-    fullname = request.json.get('fullname')
-    gender = request.json.get('gender')
-    class_name = request.json.get('class_name')
-    username = request.json.get('username')
-    email = request.json.get('email')
-    password = request.json.get('password')
-    confirm_password = request.json.get('confirm_password')
+    id = request.form.get('id')
+    fullname = request.form.get('fullname')
+    gender = request.form.get('gender')
+    class_name = request.form.get('class_name')
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    confirm_password = request.form.get('confirm_password')
 
     if password != confirm_password:
         return jsonify({"error": "Passwords do not match."}), 400
+
     if Students.query.filter_by(email=email).first():
         return jsonify({"error": "Email already exists."}), 400
 
-    # Mã hóa mật khẩu
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     new_student = Students(
         id=id,
@@ -88,8 +94,6 @@ def signup():
     send_confirmation_email(email, confirm_url)
 
     return jsonify({"message": "Sign Up successful! Please check your email to confirm your account."}), 201
-
-# Hàm gửi email xác nhận
 
 
 def send_confirmation_email(email, confirm_url):
@@ -123,17 +127,16 @@ def confirm_email(token):
 
     student = Students.query.filter_by(email=email).first()
 
-    # Kích hoạt tài khoản
     student.is_active = True
     db.session.commit()
     return render_template('mail_confirm_success.html'), 200
 
 
-@auth.route('/login', methods=['GET'])
+@auth.route('/login-page', methods=['GET'])
 def login_page():
     return render_template('login.html')
 
 
-@auth.route('/signup', methods=['GET'])
+@auth.route('/signup-page', methods=['GET'])
 def signup_page():
     return render_template('signup.html')

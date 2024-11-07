@@ -36,7 +36,7 @@
           </p>
         </div>
 
-        <form>
+        <form action="{{ url_for('auth.login') }}" method="POST">
           <div
             class="input-group input-group-lg border-bottom border-secondary mb-4"
           >
@@ -44,27 +44,29 @@
               <input
                 class="form-control bg-transparent border-0 shadow-none"
                 type="text"
-                id="email"
-                name="email"
-                placeholder="Enter your email"
+                id="text"
+                name="username"
+                placeholder="Enter your username..."
+                required
               />
-              <label for="email">Email</label>
-              <span class="pe-4"><i class="fa-regular fa-envelope"></i></span>
+              <label for="username">Username</label>
+              <span class="pe-4"><i class="fa-regular fa-user"></i></span>
             </div>
           </div>
 
           <div
             class="input-group input-group-lg border-bottom border-secondary mb-4"
           >
-            <div class="form-floating">
+            <div class="form-floating d-flex align-items-center">
               <input
                 class="form-control bg-transparent border-0 shadow-none"
                 id="password"
                 name="password"
                 placeholder="Enter your password"
                 type="password"
+                required
               />
-              <label class="" for="password">Password</label>
+              <label for="password">Password</label>
               <span class="pe-4"><i class="fa-solid fa-lock"></i></span>
             </div>
           </div>
@@ -88,7 +90,12 @@
             </button>
           </div>
 
-          <!-- <p class="text-center mt-3">Forgot password? <a href="forgot_password.html" class="underline opacity-75">Reset password</a></p> -->
+          <p class="text-center mt-3">
+            Forgot password?
+            <a href="forgot_password.html" class="underline opacity-75"
+              >Reset password</a
+            >
+          </p>
         </form>
       </aside>
       <div class="bg-login w-100"></div>

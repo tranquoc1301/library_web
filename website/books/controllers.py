@@ -48,7 +48,12 @@ def get_book_by_id_service(id):
 
 def get_all_books_service():
     book_list = Books.query.all()
-    return book_list  # Trả về danh sách sách cho template
+    return book_list
+
+
+def get_books_by_category_id_service(category_id):
+    book_list = Books.query.filter_by(category_id=category_id).all()
+    return book_list
 
 
 def get_pdf_service(book_id: int):
@@ -64,6 +69,10 @@ def get_pdf_service(book_id: int):
         return send_file(pdf_path, as_attachment=False)
     except Exception as e:
         return jsonify({"error": "Failed to send the PDF file", "details": str(e)}), 500
+
+
+def search_books_service(title):
+    return Books.query.filter(Books.title.ilike(f"%{title}%")).all()
 
 
 def update_book_service(id: int):

@@ -73,7 +73,10 @@
           <div class="row row-cols-5 g-4 mt-2">
             {% for category in categories %}
             <div class="col">
-              <a href="{{ url_for('views.category') }}" class="category">
+              <a
+                href="{{ url_for('views.books_by_category_id', category_id=category.id) }}"
+                class="category"
+              >
                 <div class="category-image position-relative">
                   <img
                     src="{{ url_for('static', filename=category.image) }}"
@@ -84,9 +87,9 @@
 
                   <div class="position-absolute card-img-overlay">
                     <h3 class="title ps-2 pt-2">{{ category.category }}</h3>
-                    <!-- <p class="text-light ps-2">
-                      {{ category.material_count }} Materials
-                    </p> -->
+                    <p class="text-light ps-2">
+                      {{ category.book_count }} Materials
+                    </p>
                   </div>
                 </div>
               </a>
