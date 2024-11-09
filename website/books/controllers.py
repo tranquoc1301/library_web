@@ -3,6 +3,7 @@ from ..db import db
 from ..library_ma import BookSchema
 from ..models import Books
 from sqlalchemy.exc import IntegrityError
+import os
 
 book_schema = BookSchema()
 books_schema = BookSchema(many=True)
@@ -56,17 +57,28 @@ def get_books_by_category_id_service(category_id):
     return book_list
 
 
-def get_pdf_service(book_id: int):
+def load_pdf_service(book_id: int):
     book = Books.query.get(book_id)
     if not book:
         abort(404, description="Book not found")
 
-    pdf_path = book.file_path
-    if not pdf_path:
-        return jsonify({"message": "PDF file not found for this book"}), 404
+    pdf_path = os.path.normpath(os.path.join('static', book.file_path))
 
     try:
         return send_file(pdf_path, as_attachment=False)
+    except Exception as e:
+        return jsonify({"error": "Failed to send the PDF file", "details": str(e)}), 500
+
+
+def download_book_service(book_id: int):
+    book = Books.query.get(book_id)
+    if not book:
+        abort(404, description="Book not found")
+
+    pdf_path = os.path.normpath(os.path.join('static', book.file_path))
+
+    try:
+        return send_file(pdf_path, as_attachment=True)
     except Exception as e:
         return jsonify({"error": "Failed to send the PDF file", "details": str(e)}), 500
 

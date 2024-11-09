@@ -2,6 +2,10 @@
   rel="stylesheet"
   href="{{ url_for('static', filename='css/header.css') }}"
 />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+/>
 <div id="header">
   <header class="container-fluid position-relative">
     <nav class="navbar navbar-expand-lg navbar-light py-3">
@@ -64,8 +68,46 @@
             </form>
           </div>
 
-          <!-- Login and Register Buttons -->
+          <!-- Conditional Rendering for User Actions -->
           <div class="d-flex ms-3">
+            {% if session.get('student_id') %}
+            <!-- User Dropdown for Logged-in User -->
+            <div class="dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                id="userDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <img
+                  src="{{ url_for('static', filename='images/user.png') }}"
+                  alt="User Avatar"
+                  width="40"
+                  height="40"
+                  class="rounded-circle"
+                />
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="userDropdown"
+              >
+                <li>
+                  <a class="dropdown-item">Profile</a>
+                </li>
+                <li>
+                  <a class="dropdown-item">Favorites</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('auth.logout') }}"
+                    >Logout</a
+                  >
+                </li>
+              </ul>
+            </div>
+            {% else %}
+            <!-- Login and Register Buttons for Guests -->
             <a
               href="{{ url_for('auth.login_page') }}"
               class="btn btn-login rounded-pill px-4 me-2"
@@ -76,6 +118,7 @@
               class="btn btn-register rounded-pill px-4"
               >Register</a
             >
+            {% endif %}
           </div>
         </div>
       </div>

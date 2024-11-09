@@ -18,41 +18,29 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['POST'])
 def login():
     try:
-        # Lấy thông tin từ form
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # Kiểm tra xem username và password có hợp lệ không
         if not username or not password:
-            return jsonify({"error": "Username and password are required."}), 400
+            return render_template("login.html", error="Username and password are required."), 400
 
         student = Students.query.filter_by(username=username).first()
 
         if student:
-            # Kiểm tra tài khoản có bị khóa không
-            if not student.is_active:
-                return jsonify({"error": "Your account is not active. Please check your email to activate it."}), 403
-
-            # Kiểm tra mật khẩu
             if bcrypt.check_password_hash(student.password, password):
-                # Tạo access token và refresh token
                 access_token = create_access_token(
                     identity=student.id, expires_delta=timedelta(hours=1))
-                refresh_token = create_refresh_token(identity=student.id)
-
-                # Lưu token vào session (nếu bạn sử dụng session để lưu token)
                 session['access_token'] = access_token
+                session['student_id'] = student.id
 
-                # Chuyển hướng đến trang chủ (index)
-                # Thay 'index' bằng tên của route trang chủ của bạn
                 return redirect(url_for('views.index'))
             else:
-                return jsonify({"error": "Incorrect password."}), 401
+                return render_template("login.html", error="Incorrect password."), 401
         else:
-            return jsonify({"error": "Username not found."}), 404
+            return render_template("login.html", error="Username not found."), 404
 
     except Exception as e:
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        return render_template("login.html", error="An unexpected error occurred: " + str(e)), 500
 
 
 @auth.route('/signup', methods=['POST'])
@@ -93,7 +81,7 @@ def signup():
     send_welcome_email(email, fullname)
     send_confirmation_email(email, confirm_url)
 
-    return jsonify({"message": "Sign Up successful! Please check your email to confirm your account."}), 201
+    return render_template('login.html')
 
 
 def send_confirmation_email(email, confirm_url):
@@ -140,3 +128,10 @@ def login_page():
 @auth.route('/signup-page', methods=['GET'])
 def signup_page():
     return render_template('signup.html')
+
+
+@auth.route('/logout')
+def logout():
+    session.pop('student_id', None)
+    session.pop('access_token', None)
+    return redirect(url_for('views.index'))

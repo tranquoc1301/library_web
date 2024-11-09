@@ -12,7 +12,6 @@ class Students(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     avatar = db.Column(db.String(255), default=None)
-    bookmarks = db.Column(db.Text)
     role = db.Column(db.Enum('user', 'admin'), nullable=False, default='user')
     created_on = db.Column(db.TIMESTAMP, nullable=True,
                            server_default=db.func.current_timestamp())
@@ -21,7 +20,7 @@ class Students(db.Model):
                            onupdate=db.func.current_timestamp())
     is_active = db.Column(db.Boolean, default=True)
 
-    def __init__(self, id, fullname, gender, class_name, username, email, password, avatar=None, bookmarks=None, role='user', is_active=True):
+    def __init__(self, id, fullname, gender, class_name, username, email, password, avatar=None,  role='user', is_active=True):
         self.id = id
         self.fullname = fullname
         self.gender = gender
@@ -30,7 +29,6 @@ class Students(db.Model):
         self.email = email
         self.password = password
         self.avatar = avatar
-        self.bookmarks = bookmarks
         self.role = role
         self.is_active = is_active
 

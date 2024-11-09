@@ -71,21 +71,25 @@ header .navbar {
   box-shadow: 0 0 8px rgba(13, 71, 161, 0.5);
 }
 
+/* Search Button */
 .search-btn {
   position: absolute;
-  top: 0;
-  right: 12px;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
   background-color: transparent;
   border: none;
   color: #42a5f5;
   font-size: 20px;
   cursor: pointer;
   transition: color 0.3s ease, transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-btn:hover {
   color: #0d47a1;
-  transform: scale(1.1); /* Slight zoom effect on hover */
 }
 
 /* Login and Register Buttons */

@@ -49,6 +49,16 @@ def books_by_category_id(category_id):
     return render_template('book.html', books=books)
 
 
+@views.route('/books/<int:book_id>/read', methods=['GET'])
+def read_book(book_id):
+    return book_controllers.load_pdf_service(book_id)
+
+
+@views.route('/books/<int:book_id>/download', methods=['GET'])
+def download_book(book_id):
+    return book_controllers.download_book_service(book_id)
+
+
 @views.route('/categories')
 def category():
     categories = category_controllers.get_all_categories_service()
