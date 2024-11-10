@@ -6,6 +6,13 @@
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
 />
+<link
+  rel="icon"
+  href="{{ url_for('static', filename='images/favicon.ico') }}"
+  type="image/x-icon"
+/>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 <div id="header">
   <header class="container-fluid position-relative">
     <nav class="navbar navbar-expand-lg navbar-light py-3">
@@ -94,7 +101,11 @@
                 aria-labelledby="userDropdown"
               >
                 <li>
-                  <a class="dropdown-item">Profile</a>
+                  <a
+                    href="{{ url_for('views.profile', student_id=session['student_id']) }}"
+                    class="dropdown-item"
+                    >Profile</a
+                  >
                 </li>
                 <li>
                   <a class="dropdown-item">Favorites</a>

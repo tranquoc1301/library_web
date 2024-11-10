@@ -9,12 +9,6 @@ body {
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
   padding: 32px;
   margin-top: 32px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.bg-book:hover {
-  transform: translateY(-5px);
-  box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.2);
 }
 
 .text-light {

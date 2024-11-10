@@ -32,7 +32,7 @@ def login():
                     identity=student.id, expires_delta=timedelta(hours=1))
                 session['access_token'] = access_token
                 session['student_id'] = student.id
-
+                session['role'] = student.role
                 return redirect(url_for('views.index'))
             else:
                 return render_template("login.html", error="Incorrect password."), 401
@@ -108,16 +108,35 @@ def send_welcome_email(email, fullname):
 @auth.route('/confirm/<token>', methods=['GET'])
 def confirm_email(token):
     try:
-        email = s.loads(token, salt='email-confirm',
-                        max_age=3600)
+        # Try to load the email from the token
+        email = s.loads(token, salt='email-confirm', max_age=3600)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+    # Find the student using the email from the token
     student = Students.query.filter_by(email=email).first()
 
-    student.is_active = True
-    db.session.commit()
-    return render_template('mail_confirm_success.html'), 200
+    if student:
+        # Activate the account
+        student.is_active = True
+        db.session.commit()
+
+        return render_template('mail_confirm_success.html'), 200
+    else:
+        return jsonify({"error": "Student not found"}), 404
+
+
+@auth.route('/account/activate/<student_id>', methods=['POST'])
+def activate_account(student_id):
+    student = Students.query.get_or_404(student_id)
+
+    # Create the confirmation token
+    token = s.dumps(student.email, salt='email-confirm')
+    confirm_url = url_for('auth.confirm_email', token=token, _external=True)
+
+    send_confirmation_email(student.email, confirm_url)
+
+    return redirect(url_for('views.profile', student_id=student.id))
 
 
 @auth.route('/login-page', methods=['GET'])

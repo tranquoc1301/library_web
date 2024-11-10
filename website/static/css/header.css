@@ -1,6 +1,8 @@
 /* Header Background and Container */
 .container-fluid {
-  padding: 0; /* Removes padding for full-width */
+  padding: 0; 
+  position: relative;
+  z-index: 999;
 }
 header .navbar {
   backdrop-filter: blur(10px);

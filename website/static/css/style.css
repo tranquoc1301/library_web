@@ -106,3 +106,30 @@ header {
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+/* Nút Add to Favorites */
+.btn-favorite {
+  background-color: #ff5a5f; /* Màu nền nổi bật */
+  border: 2px solid #fff; /* Viền trắng */
+  color: #fff; /* Màu chữ và biểu tượng */
+  border-radius: 5px; /* Bo góc nhẹ */
+  padding: 8px 12px; /* Kích thước của nút chữ nhật */
+  font-size: 14px; /* Kích thước chữ */
+}
+
+/* Nút khi hover */
+.btn-favorite:hover {
+  background-color: #ff3d3f; /* Màu nền khi hover */
+  border-color: #fff; /* Viền khi hover */
+  color: #fff; /* Màu chữ khi hover */
+}
+
+.img-fluid {
+  border-radius: 10px; /* Bo góc ảnh */
+}
+
+/* Chỉnh vị trí nút */
+.position-absolute {
+  margin-top: 10px;
+  margin-right: 10px; /* Sát góc trên bên phải */
+}

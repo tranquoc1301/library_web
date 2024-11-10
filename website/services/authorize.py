@@ -1,20 +1,20 @@
 from functools import wraps
-from flask import request, jsonify, abort
-from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+from flask import abort, session
 from ..models import Students
 
 
-def role_required(required_role):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            verify_jwt_in_request()
-            current_user_id = get_jwt_identity()
-            student = Students.query.get(current_user_id)
-            if not student:
-                abort(401, description="Unauthorized user")
-            if student.role != required_role:
-                return jsonify({"message": "You do not have permission to access this resource"}), 403
-            return func(*args, **kwargs)
-        return wrapper
+def role_required(roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            student_id = session.get('student_id')
+            if not student_id:
+                return abort(401)  # Unauthorized nếu chưa đăng nhập
+
+            student = Students.query.get(student_id)
+            if student.role not in roles:
+                return abort(403)  # Forbidden nếu vai trò không phù hợp
+
+            return f(*args, **kwargs)
+        return decorated_function
     return decorator

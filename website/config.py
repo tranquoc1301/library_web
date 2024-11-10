@@ -7,6 +7,7 @@ MAIL_USE_TLS = True
 MAIL_USERNAME = 'dutlibrary1301@gmail.com'
 MAIL_PASSWORD = 'jxxv bhdn vhbg wcbh'
 MAIL_DEFAULT_SENDER = 'dutlibrary1301@gmail.com'
+UPLOAD_AVATAR_FOLDER = os.path.join('website', 'static', 'avatars')
 
 # Cấu hình chung cho Flask
 SECRET_KEY = os.environ.get('KEY')  # Lấy từ biến môi trường

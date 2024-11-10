@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, request
 from .models import Books, Category  # Đảm bảo bạn đã định nghĩa các model này
 from .books import controllers as book_controllers
 from .category import controllers as category_controllers
+from .students import controllers as student_controllers
+from .services.authorize import role_required
 
 # Tạo một blueprint cho các route
 views = Blueprint('views', __name__)
@@ -50,11 +52,13 @@ def books_by_category_id(category_id):
 
 
 @views.route('/books/<int:book_id>/read', methods=['GET'])
+@role_required(['user', 'admin'])
 def read_book(book_id):
     return book_controllers.load_pdf_service(book_id)
 
 
 @views.route('/books/<int:book_id>/download', methods=['GET'])
+@role_required(['user', 'admin'])
 def download_book(book_id):
     return book_controllers.download_book_service(book_id)
 
@@ -67,3 +71,26 @@ def category():
             book_controllers.get_books_by_category_id_service(category.id))
 
     return render_template('category.html', categories=categories)
+
+
+@views.route('/student/<student_id>/profile', methods=['GET'])
+@role_required(['user', 'admin'])
+def profile(student_id):
+    return render_template('profile.html', user=student_controllers.get_student_by_id_service(student_id))
+
+
+@views.route('/student/<student_id>/profile/upload-avatar', methods=['POST'])
+@role_required('user')
+def upload_avatar(student_id):
+    return student_controllers.upload_avatar_service(student_id)
+
+
+@views.route('/student/<student_id>/profile/update', methods=['POST'])
+@role_required('user')
+def update_profile(student_id):
+    return student_controllers.update_student_service(student_id)
+
+
+@views.app_errorhandler(401)
+def forbidden(e):
+    return render_template('401.html'), 401
