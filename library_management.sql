@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 10, 2024 at 01:06 PM
+-- Generation Time: Nov 11, 2024 at 01:15 PM
 -- Server version: 8.0.39
 -- PHP Version: 8.2.12
 
@@ -113,7 +113,7 @@ INSERT INTO `category` (`id`, `category`, `image`) VALUES
 CREATE TABLE `comments` (
   `id` int NOT NULL,
   `book_id` int NOT NULL,
-  `student_id` varchar(10) NOT NULL,
+  `user_id` int NOT NULL,
   `content` text NOT NULL,
   `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -128,7 +128,7 @@ CREATE TABLE `comments` (
 CREATE TABLE `favorites` (
   `id` int NOT NULL,
   `book_id` int NOT NULL,
-  `student_id` varchar(10) NOT NULL,
+  `user_id` int NOT NULL,
   `added_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -141,7 +141,7 @@ CREATE TABLE `favorites` (
 CREATE TABLE `ratings` (
   `id` int NOT NULL,
   `book_id` int NOT NULL,
-  `student_id` varchar(10) NOT NULL,
+  `user_id` int NOT NULL,
   `rating` tinyint NOT NULL,
   `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `update_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -150,30 +150,28 @@ CREATE TABLE `ratings` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `students`
+-- Table structure for table `users`
 --
 
-CREATE TABLE `students` (
-  `id` varchar(10) NOT NULL,
+CREATE TABLE `users` (
+  `id` int NOT NULL,
   `fullname` varchar(100) NOT NULL,
-  `gender` varchar(5) NOT NULL,
-  `class_name` varchar(50) NOT NULL,
-  `username` varchar(100) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(100) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(100) NOT NULL,
   `avatar` varchar(255) DEFAULT NULL,
-  `role` enum('user','admin') NOT NULL DEFAULT 'user',
-  `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `is_active` tinyint(1) NOT NULL
+  `role` varchar(20) DEFAULT 'student',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_active` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `students`
+-- Dumping data for table `users`
 --
 
-INSERT INTO `students` (`id`, `fullname`, `gender`, `class_name`, `username`, `email`, `password`, `avatar`, `role`, `created_on`, `updated_on`, `is_active`) VALUES
-('102220335', 'Tran Quoc', 'Male', '22T_Nhat2', 'tranquoc1301', 'tranquoc1301@gmail.com', '$2b$12$iJgOlvlJfzfUGo1XVVxP2O1TbSWBOAZGyZ7HLf9OPZnZ45oMjW0Cy', 'avatars/Night_City.png', 'user', '2024-11-09 02:57:35', '2024-11-10 08:46:38', 1);
+INSERT INTO `users` (`id`, `fullname`, `username`, `password`, `email`, `avatar`, `role`, `created_at`, `updated_at`, `is_active`) VALUES
+(1, 'Tran Quoc', 'Hoc12345', '$2b$12$z0yywnTfZlOBEV.X69nwmexR5TVD346Gnyd8G9ksu67piiR/FhV9u', 'tranquoc1301@gmail.com', 'avatars/Elden_Ring_moon.jpeg', 'user', '2024-11-10 14:34:22', '2024-11-10 14:39:38', 1);
 
 --
 -- Indexes for dumped tables
@@ -190,8 +188,7 @@ ALTER TABLE `books`
 -- Indexes for table `category`
 --
 ALTER TABLE `category`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_category` (`category`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `comments`
@@ -199,15 +196,15 @@ ALTER TABLE `category`
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `book_id` (`book_id`),
-  ADD KEY `student_id` (`student_id`);
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `favorites`
 --
 ALTER TABLE `favorites`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `book_id` (`book_id`,`student_id`),
-  ADD KEY `student_id` (`student_id`);
+  ADD KEY `book_id` (`book_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `ratings`
@@ -215,15 +212,13 @@ ALTER TABLE `favorites`
 ALTER TABLE `ratings`
   ADD PRIMARY KEY (`id`),
   ADD KEY `book_id` (`book_id`),
-  ADD KEY `student_id` (`student_id`);
+  ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `students`
+-- Indexes for table `users`
 --
-ALTER TABLE `students`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -233,7 +228,7 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -251,13 +246,19 @@ ALTER TABLE `comments`
 -- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `ratings`
 --
 ALTER TABLE `ratings`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
@@ -273,22 +274,22 @@ ALTER TABLE `books`
 -- Constraints for table `comments`
 --
 ALTER TABLE `comments`
-  ADD CONSTRAINT `comments_fk_book` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `comments_fk_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`),
+  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `favorites`
 --
 ALTER TABLE `favorites`
-  ADD CONSTRAINT `favorites_fk_book` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `favorites_fk_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`),
+  ADD CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `ratings`
 --
 ALTER TABLE `ratings`
-  ADD CONSTRAINT `ratings_fk_book` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `ratings_fk_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `ratings_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`),
+  ADD CONSTRAINT `ratings_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
