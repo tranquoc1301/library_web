@@ -30,7 +30,7 @@ def index():
 @views.route('/books', methods=['GET'])
 def books():
     books = book_controllers.get_all_books_service()
-    return render_template('book.html', books=books)
+    return render_template('users/book.html', books=books)
 
 # Book details route
 
@@ -40,7 +40,7 @@ def book_detail(book_id):
     book = book_controllers.get_book_by_id_service(book_id)
     book.category_name = category_controllers.get_category_by_id_service(
         book.category_id).category
-    return render_template('book_detail.html', book=book)
+    return render_template('users/book_detail.html', book=book)
 
 # Search books by title
 
@@ -49,7 +49,7 @@ def book_detail(book_id):
 def search_books():
     title = request.args.get('title')
     books = book_controllers.search_books_service(title)
-    return render_template("book.html", books=books)
+    return render_template("users/book.html", books=books)
 
 # Books by category
 
@@ -57,7 +57,7 @@ def search_books():
 @views.route('/books/category/<int:category_id>', methods=['GET'])
 def books_by_category_id(category_id):
     books = book_controllers.get_books_by_category_id_service(category_id)
-    return render_template('book.html', books=books)
+    return render_template('users/book.html', books=books)
 
 # Reading and downloading books (protected routes)
 
@@ -89,7 +89,7 @@ def category():
         category.book_count = len(
             book_controllers.get_books_by_category_id_service(category.id))
 
-    return render_template('category.html', categories=categories)
+    return render_template('users/category.html', categories=categories)
 
 # User profile route
 
@@ -129,7 +129,7 @@ def favorites():
     user_id = session.get('user_id')
     favorites_books = favorite_controllers.get_favorites_books_by_user_id_service(
         user_id)
-    return render_template('favorites.html', books=favorites_books)
+    return render_template('users/favorites.html', books=favorites_books)
 
 # Add to favorites route
 
@@ -175,3 +175,41 @@ def load_user():
         g.user = user_controllers.get_user_by_id_service(user_id)
     else:
         g.user = None
+
+# view for admin #
+
+@views.route('/admin')
+def adminPage():
+    return render_template('admin/dashboard.html')
+
+@views.route('/admin/categories')
+def categories_admin():
+    return render_template('admin/categories.html')
+
+@views.route('/admin/category/new')
+def category_form():
+    return render_template('/admin/category_form.html')
+
+@views.route('/admin/books')
+def books_admin():
+    return render_template('admin/books.html')
+
+@views.route('/admin/books/new')
+def book_form():
+    return render_template('admin/book_form.html')
+
+@views.route('/admin/books/request')
+def book_request():
+    return render_template('admin/book_request.html')
+
+@views.route('/admin/books/issued')
+def book_issued():
+    return render_template('admin/issued_book.html')
+
+@views.route('/admin/users')
+def users():
+    return render_template('admin/users.html')
+
+@views.route('/admin/users/new')
+def user_form():
+    return render_template('admin/user_form.html')
