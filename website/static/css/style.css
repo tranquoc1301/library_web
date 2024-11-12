@@ -108,30 +108,31 @@ header {
 }
 
 .btn-favorite {
-  background-color: #ff5a5f; 
-  border: 2px solid #fff; 
-  color: #fff; 
-  border-radius: 5px; 
-  padding: 6px; 
+  background-color: #ff5a5f;
+  border: 2px solid #fff;
+  color: #fff;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 0;
   font-size: 18px;
   width: 40px;
   height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .btn-favorite:hover {
-  background-color: #ff3d3f; 
-  border-color: #fff; 
-  color: #fff; 
+  background-color: #ff3d3f;
+  border-color: #fff;
+  color: #fff;
 }
 
 .img-fluid {
-  border-radius: 10px; 
+  border-radius: 10px;
 }
 
-.position-absolute {
-  margin-top: 10px;
-  margin-right: 10px; 
-}
+

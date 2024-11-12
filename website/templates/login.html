@@ -76,6 +76,13 @@
             </div>
           </div>
 
+          <!-- Error message displayed below password field -->
+          {% if error %}
+            <div class="text-danger text-center mb-3">
+              <p>{{ error }}</p>
+            </div>
+          {% endif %}
+
           <div class="ps-2 mb-4">
             <input
               type="checkbox"
@@ -97,7 +104,7 @@
 
           <p class="text-center mt-3">
             Forgot password?
-            <a href="forgot_password.html" class="underline opacity-75"
+            <a href="{{ url_for('auth.forgot_password') }}" class="underline opacity-75"
               >Reset password</a
             >
           </p>
@@ -105,7 +112,5 @@
       </aside>
       <div class="bg-login w-100"></div>
     </div>
-
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>
 </html>

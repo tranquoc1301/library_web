@@ -8,16 +8,16 @@ comments_schema = CommentSchema(many=True)
 
 
 def add_comment_service():
-    data = request.get_json()
+    data = request.form  # Get form data instead of JSON
 
-    errors = comment_schema.validate(data)
+    errors = comment_schema.validate(data)  # Validating the form data
     if errors:
         return jsonify({"errors": errors}), 400
 
     try:
         new_comment = Comments(
             book_id=data.get('book_id'),
-            student_id=data.get('student_id'),
+            user_id=data.get('user_id'),
             content=data.get('content')
         )
 
@@ -41,14 +41,14 @@ def get_comment_service(id):
     return comment  # Trả về đối tượng bình luận cho template
 
 
-def update_comment_service(id):
+def update_comment_service(id: int):
     comment = Comments.query.get(id)
     if not comment:
         abort(404, description="Comment not found")
 
-    data = request.get_json()
+    data = request.form  # Use form data instead of JSON
 
-    errors = comment_schema.validate(data)
+    errors = comment_schema.validate(data)  # Validate the form data
     if errors:
         return jsonify({"errors": errors}), 400
 

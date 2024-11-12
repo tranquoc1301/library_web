@@ -1,8 +1,8 @@
-from flask import Blueprint, request, jsonify, url_for, render_template, redirect, session
+from flask import Blueprint, request, jsonify, url_for, render_template, redirect, session, flash
 from flask_bcrypt import Bcrypt
 from flask_mail import Message, Mail
 from .db import db
-from .models import Students
+from .models import Users
 from itsdangerous import URLSafeTimedSerializer
 from flask_jwt_extended import create_access_token, create_refresh_token
 import os
@@ -24,15 +24,15 @@ def login():
         if not username or not password:
             return render_template("login.html", error="Username and password are required."), 400
 
-        student = Students.query.filter_by(username=username).first()
+        user = Users.query.filter_by(username=username).first()
 
-        if student:
-            if bcrypt.check_password_hash(student.password, password):
+        if user:
+            if bcrypt.check_password_hash(user.password, password):
                 access_token = create_access_token(
-                    identity=student.id, expires_delta=timedelta(hours=1))
+                    identity=user.id, expires_delta=timedelta(hours=1))
                 session['access_token'] = access_token
-                session['student_id'] = student.id
-                session['role'] = student.role
+                session['user_id'] = user.id
+                session['role'] = user.role
                 return redirect(url_for('views.index'))
             else:
                 return render_template("login.html", error="Incorrect password."), 401
@@ -45,10 +45,7 @@ def login():
 
 @auth.route('/signup', methods=['POST'])
 def signup():
-    id = request.form.get('id')
     fullname = request.form.get('fullname')
-    gender = request.form.get('gender')
-    class_name = request.form.get('class_name')
     username = request.form.get('username')
     email = request.form.get('email')
     password = request.form.get('password')
@@ -57,22 +54,19 @@ def signup():
     if password != confirm_password:
         return jsonify({"error": "Passwords do not match."}), 400
 
-    if Students.query.filter_by(email=email).first():
+    if Users.query.filter_by(email=email).first():
         return jsonify({"error": "Email already exists."}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    new_student = Students(
-        id=id,
+    new_user = Users(
         fullname=fullname,
-        gender=gender,
-        class_name=class_name,
         username=username,
         email=email,
         password=hashed_password,
         is_active=False
     )
 
-    db.session.add(new_student)
+    db.session.add(new_user)
     db.session.commit()
 
     # Tạo token xác nhận và gửi email
@@ -113,30 +107,30 @@ def confirm_email(token):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-    # Find the student using the email from the token
-    student = Students.query.filter_by(email=email).first()
+    # Find the user using the email from the token
+    user = Users.query.filter_by(email=email).first()
 
-    if student:
+    if user:
         # Activate the account
-        student.is_active = True
+        user.is_active = True
         db.session.commit()
 
         return render_template('mail_confirm_success.html'), 200
     else:
-        return jsonify({"error": "Student not found"}), 404
+        return jsonify({"error": "user not found"}), 404
 
 
-@auth.route('/account/activate/<student_id>', methods=['POST'])
-def activate_account(student_id):
-    student = Students.query.get_or_404(student_id)
+@auth.route('/account/activate/<user_id>', methods=['POST'])
+def activate_account(user_id):
+    user = Users.query.get_or_404(user_id)
 
     # Create the confirmation token
-    token = s.dumps(student.email, salt='email-confirm')
+    token = s.dumps(user.email, salt='email-confirm')
     confirm_url = url_for('auth.confirm_email', token=token, _external=True)
 
-    send_confirmation_email(student.email, confirm_url)
+    send_confirmation_email(user.email, confirm_url)
 
-    return redirect(url_for('views.profile', student_id=student.id))
+    return redirect(url_for('views.profile', user_id=user.id))
 
 
 @auth.route('/login-page', methods=['GET'])
@@ -149,8 +143,122 @@ def signup_page():
     return render_template('signup.html')
 
 
+@auth.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    # If the request method is GET, render the change password form
+    if request.method == 'GET':
+        return render_template('change_password.html')
+
+    # If the request method is POST, process the form submission
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        new_password_confirm = request.form.get('new_password_confirm')
+
+        # Check if the new password and confirmation match
+        if new_password != new_password_confirm:
+            flash('Passwords do not match. Please try again.', 'error')
+            # Redirect to the previous page if passwords do not match
+            return redirect(request.referrer)
+
+        # Hash and save the new password
+        hashed_password = bcrypt.generate_password_hash(
+            new_password).decode('utf-8')
+        # Get the user based on the session's user_id
+        user = Users.query.get(session['user_id'])
+
+        if user:
+            # If user exists, update the password and commit the change
+            user.password = hashed_password
+            db.session.commit()
+            # Log the user out by removing their user_id from the session
+            session.pop('user_id', None)
+
+            # Redirect the user to the login page after successful password change
+            return redirect(url_for('auth.login_page'))
+
+        else:
+            # If user is not found, display an error and redirect to the previous page
+            flash('User not found. Please try again.', 'error')
+            # Redirect to the previous page if user is not found
+            return redirect(request.referrer)
+
+
 @auth.route('/logout')
 def logout():
-    session.pop('student_id', None)
+    session.pop('user_id', None)
     session.pop('access_token', None)
     return redirect(url_for('views.index'))
+
+# Forgot Password Route
+
+
+@auth.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = Users.query.filter_by(email=email).first()
+        if user:
+            token = s.dumps(email, salt='password-reset')
+            reset_url = url_for('auth.reset_password_form',
+                                token=token, _external=True)
+            send_reset_password_email(email, reset_url)
+            flash('Password reset link has been sent to your email.', 'success')
+        else:
+            flash('If the email is registered, a reset link will be sent.', 'info')
+        return redirect(request.referrer)
+
+    return render_template('forgot_password.html')
+
+
+# Reset Password Form Route (GET)
+@auth.route('/reset-password/<token>', methods=['GET'])
+def reset_password_form(token):
+    try:
+        email = s.loads(token, salt='password-reset', max_age=3600)
+    except Exception:
+        flash("The password reset link is invalid or has expired.", "error")
+        return redirect(url_for('auth.forgot_password'))
+    return render_template('reset_password.html', token=token)
+
+
+# Reset Password Submit Route (POST)
+@auth.route('/reset-password', methods=['POST'])
+def reset_password_submit():
+    token = request.form.get('token')
+    print(f"Token received: {token}")  # Log the received token
+
+    if not token:
+        flash("Token is missing. Please request a new password reset link.", "error")
+        return redirect(url_for('auth.forgot_password'))
+
+    try:
+        email = s.loads(token, salt='password-reset', max_age=3600)
+    except Exception:
+        flash("The password reset link is invalid or has expired.", "error")
+        return redirect(url_for('auth.forgot_password'))
+
+    user = Users.query.filter_by(email=email).first()
+    if user:
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('new_password_confirm')
+
+        if new_password != confirm_password:
+            flash('Passwords do not match. Please try again.', 'error')
+            return redirect(request.referrer)
+
+        # Hash and save the new password
+        user.password = bcrypt.generate_password_hash(new_password)
+        db.session.commit()
+        flash('Password has been reset successfully. Please log in with your new password.', 'success')
+        return redirect(request.referrer)
+    else:
+        flash('User not found. Please try again.', 'error')
+        return redirect(url_for('auth.forgot_password'))
+
+# Send Reset Password Email
+
+
+def send_reset_password_email(email, reset_url):
+    msg = Message('Reset Your Password', recipients=[email])
+    msg.body = f'Please click the following secure link to reset your password: {reset_url}'
+    mail.send(msg)

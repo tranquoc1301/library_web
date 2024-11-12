@@ -1,4 +1,4 @@
-from ..models import Rating, Books
+from ..models import Rating, Books, flash, redirect, url_for
 from flask import request, jsonify, abort
 from ..db import db
 from ..library_ma import RatingSchema
@@ -9,44 +9,55 @@ ratings_schema = RatingSchema(many=True)
 
 
 def add_rating_service():
-    data = request.get_json()
+    # Lấy dữ liệu từ form
+    rating_value = request.form.get('rating', type=int)
+    book_id = request.form.get('book_id', type=int)
+    user_id = request.form.get('user_id', type=int)
+    comment = request.form.get('comment')
 
-    errors = rating_schema.validate(data)
-    if errors:
-        return jsonify({"errors": errors}), 400
+    # Kiểm tra tính hợp lệ của rating
+    if rating_value is None or rating_value < 1 or rating_value > 5:
+        flash("Rating must be between 1 and 5.", "error")
+        # return redirect(url_for('view_book', book_id=book_id))  # Quay lại trang sách
 
-    rating_value = data.get('rating')
-    if rating_value < 1 or rating_value > 5:
-        return jsonify({"error": "Rating must be between 1 and 5."}), 400
+    if not book_id or not user_id:
+        flash("Both book and user are required", "error")
+        # return redirect(url_for('view_book', book_id=book_id))  # Quay lại trang sách
 
     try:
+        # Kiểm tra nếu người dùng đã đánh giá cuốn sách này chưa
+        existing_rating = Rating.query.filter_by(
+            book_id=book_id, user_id=user_id).first()
+        if existing_rating:
+            flash("You have already rated this book.", "info")
+            # return redirect(url_for('view_book', book_id=book_id))  # Quay lại trang sách
+
+        # Tạo đối tượng đánh giá mới
         new_rating = Rating(
-            book_id=data.get('book_id'),
-            student_id=data.get('student_id'),
+            book_id=book_id,
+            user_id=user_id,
             rating=rating_value,
-            comment=data.get('comment')
+            comment=comment
         )
 
         db.session.add(new_rating)
         db.session.commit()
 
-        # Calculate the new average rating for the book
         average_rating = Rating.query.filter_by(
-            book_id=new_rating.book_id).with_entities(db.func.avg(Rating.rating)).scalar()
+            book_id=book_id).with_entities(db.func.avg(Rating.rating)).scalar()
 
-        book = Books.query.get(new_rating.book_id)
+        book = Books.query.get(book_id)
         if book:
             book.average_rating = average_rating
             db.session.commit()
 
-        return jsonify(rating_schema.dump(new_rating)), 201
+        flash("Thank you for your rating!", "success")
+        # return redirect(url_for('view_book', book_id=book_id))  # Quay lại trang sách
 
-    except IntegrityError:
-        db.session.rollback()
-        return jsonify({"error": "Rating for this book by this student already exists."}), 409
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash(f"An unexpected error occurred: {str(e)}", "error")
+        # return redirect(url_for('view_book', book_id=book_id))  # Quay lại trang sách
 
 
 def get_all_ratings_service(book_id: int):
@@ -54,39 +65,53 @@ def get_all_ratings_service(book_id: int):
     return ratings  # Trả về danh sách đánh giá cho template
 
 
-def update_rating_service(book_id: int, student_id: str):
-    rating = Rating.query.filter_by(
-        book_id=book_id, student_id=student_id).first()
+def update_rating_service(book_id: int, user_id: int):
+    rating = Rating.query.filter_by(book_id=book_id, user_id=user_id).first()
     if not rating:
-        abort(404, description="Rating not found")
+        flash("Rating not found", "error")
+        # return redirect(url_for('view_book', book_id=book_id))
 
-    data = request.get_json()
+    # Lấy dữ liệu từ form
+    rating_value = request.form.get('rating', type=int)
+    comment = request.form.get('comment')
 
-    errors = rating_schema.validate(data)
-    if errors:
-        return jsonify({"errors": errors}), 400
-
-    rating_value = data.get('rating')
-    if rating_value and (rating_value < 1 or rating_value > 5):
-        return jsonify({"error": "Rating must be between 1 and 5."}), 400
+    # Kiểm tra tính hợp lệ của rating
+    if rating_value is not None and (rating_value < 1 or rating_value > 5):
+        flash("Rating must be between 1 and 5.", "error")
+        # return redirect(url_for('view_book', book_id=book_id))
 
     try:
+        # Cập nhật rating nếu có thay đổi
         if rating_value:
             rating.rating = rating_value
-        if 'comment' in data:
-            rating.comment = data['comment']
+        if comment:
+            rating.comment = comment
 
         db.session.commit()
-        return jsonify(rating_schema.dump(rating)), 200
+
+        # Tính toán lại điểm đánh giá trung bình của sách
+        average_rating = Rating.query.filter_by(
+            book_id=book_id).with_entities(db.func.avg(Rating.rating)).scalar()
+
+        book = Books.query.get(book_id)
+        if book:
+            book.average_rating = average_rating
+            db.session.commit()
+
+        flash("Your rating has been updated!", "success")
+        # Quay lại trang sách
+        # return redirect(url_for('view_book', book_id=book_id))
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash(f"An unexpected error occurred: {str(e)}", "error")
+        # Quay lại trang sách
+        # return redirect(url_for('view_book', book_id=book_id))
 
 
-def delete_rating_service(book_id: int, student_id: str):
+def delete_rating_service(book_id: int, user_id: int):
     rating = Rating.query.filter_by(
-        book_id=book_id, student_id=student_id).first()
+        book_id=book_id, user_id=user_id).first()
     if not rating:
         abort(404, description="Rating not found")
 

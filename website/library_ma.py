@@ -1,9 +1,9 @@
 from .db import ma
 
 
-class StudentSchema(ma.Schema):
+class UserSchema(ma.Schema):
     class Meta:
-        fields = ("id", "fullname", "gender", "class_name",
+        fields = ("id", "fullname"
                   "username", "email", "role", "created_on", "updated_on", "is_active")
 
 
@@ -20,16 +20,16 @@ class CategorySchema(ma.Schema):
 
 class CommentSchema(ma.Schema):
     class Meta:
-        fields = ("id", "book_id", "student_id",
+        fields = ("id", "book_id", "user_id",
                   "content", "created_on", "updated_on")
 
 
 class FavoriteSchema(ma.Schema):
     class Meta:
-        fields = ("id", "book_id", "student_id", "added_on")
+        fields = ("id", "book_id", "user_id", "added_on")
 
 
 class RatingSchema(ma.Schema):
     class Meta:
-        fields = ("id", "book_id", "student_id",
+        fields = ("id", "book_id", "user_id",
                   "rating", "created_on", "updated_on")

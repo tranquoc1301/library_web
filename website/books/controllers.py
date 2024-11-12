@@ -1,4 +1,4 @@
-from flask import send_file, request, jsonify, abort
+from flask import send_file, request, jsonify, abort, flash
 from ..db import db
 from ..library_ma import BookSchema
 from ..models import Books
@@ -10,34 +10,45 @@ books_schema = BookSchema(many=True)
 
 
 def add_book_service():
-    data = request.get_json()
+    # Lấy dữ liệu từ form
+    title = request.form.get('title')
+    category_id = request.form.get('category_id')
+    publish_year = request.form.get('publish_year')
+    author = request.form.get('author')
+    publisher = request.form.get('publisher')
+    summary = request.form.get('summary')
+    cover = request.form.get('cover')
+    file_path = request.form.get('file_path')
 
-    errors = book_schema.validate(data)
-    if errors:
-        return jsonify({"errors": errors}), 400
+    # Kiểm tra dữ liệu từ form (có thể thêm các điều kiện kiểm tra dữ liệu)
+    if not all([title, category_id, publish_year, author, publisher]):
+        flash("All fields are required", "error")
+        # return redirect(url_for('add_book'))
 
     try:
+        # Tạo mới một cuốn sách từ dữ liệu form
         new_book = Books(
-            category_id=data.get('category_id'),
-            title=data.get('title'),
-            publish_year=data.get('publish_year'),
-            author=data.get('author'),
-            publisher=data.get('publisher'),
-            summary=data.get('summary'),
-            cover=data.get('cover'),
-            file_path=data.get('file_path')
+            category_id=category_id,
+            title=title,
+            publish_year=publish_year,
+            author=author,
+            publisher=publisher,
+            summary=summary,
+            cover=cover,
+            file_path=file_path
         )
 
         db.session.add(new_book)
         db.session.commit()
-        return book_schema.jsonify(new_book), 201
+
+        flash("Book added successfully", "success")
 
     except IntegrityError:
         db.session.rollback()
-        return jsonify({"error": "Book with this title already exists"}), 409
+        flash("Book with this title already exists", "error")
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash(f"An unexpected error occurred: {str(e)}", "error")
 
 
 def get_book_by_id_service(id):
@@ -90,26 +101,45 @@ def search_books_service(title):
 def update_book_service(id: int):
     book = Books.query.get(id)
     if not book:
-        abort(404, description="Book not found")
+        flash("Book not found", "error")
+        # Chuyển hướng về danh sách sách nếu không tìm thấy sách
+        # return redirect(url_for('views.books'))
 
-    data = request.get_json()
+    # Lấy dữ liệu từ form
+    title = request.form.get('title')
+    category_id = request.form.get('category_id')
+    publish_year = request.form.get('publish_year')
+    author = request.form.get('author')
+    publisher = request.form.get('publisher')
+    summary = request.form.get('summary')
+    cover = request.form.get('cover')
+    file_path = request.form.get('file_path')
 
-    errors = book_schema.validate(data)
-    if errors:
-        return jsonify({"errors": errors}), 400
+    # Kiểm tra dữ liệu từ form (có thể thêm các điều kiện kiểm tra dữ liệu)
+    if not all([title, category_id, publish_year, author, publisher]):
+        flash("All fields are required", "error")
+        # return redirect(url_for('update_book', id=id))  # Chuyển hướng lại trang sửa nếu thiếu trường dữ liệu
 
     try:
-        for key, value in data.items():
-            if getattr(book, key) != value:
-                setattr(book, key, value)
+        # Cập nhật thông tin sách
+        book.title = title
+        book.category_id = category_id
+        book.publish_year = publish_year
+        book.author = author
+        book.publisher = publisher
+        book.summary = summary
+        book.cover = cover
+        book.file_path = file_path
 
-        db.session.add(book)
         db.session.commit()
-        return jsonify({"message": "Book updated successfully"}), 200
+
+        flash("Book updated successfully", "success")
+        # return redirect(url_for('view_books'))  # Chuyển hướng về danh sách sách sau khi sửa thành công
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash(f"An unexpected error occurred: {str(e)}", "error")
+        # return redirect(url_for('update_book', id=id))  # Chuyển hướng lại trang sửa nếu có lỗi
 
 
 def delete_book_service(id: int):

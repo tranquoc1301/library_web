@@ -1,30 +1,25 @@
 from .db import db
 
 
-class Students(db.Model):
-    __tablename__ = 'students'
+class Users(db.Model):
+    __tablename__ = 'users'
 
-    id = db.Column(db.String(10), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     fullname = db.Column(db.String(100), nullable=False)
-    gender = db.Column(db.String(5), nullable=False)
-    class_name = db.Column(db.String(50), nullable=False)
     username = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
     avatar = db.Column(db.String(255), default=None)
     role = db.Column(db.Enum('user', 'admin'), nullable=False, default='user')
-    created_on = db.Column(db.TIMESTAMP, nullable=True,
+    created_at = db.Column(db.TIMESTAMP, nullable=False,
                            server_default=db.func.current_timestamp())
-    updated_on = db.Column(db.TIMESTAMP, nullable=True,
-                           server_default=db.func.current_timestamp(),
+    updated_at = db.Column(db.TIMESTAMP, nullable=False, server_default=db.func.current_timestamp(),
                            onupdate=db.func.current_timestamp())
-    is_active = db.Column(db.Boolean, default=True)
 
-    def __init__(self, id, fullname, gender, class_name, username, email, password, avatar=None,  role='user', is_active=True):
-        self.id = id
+    is_active = db.Column(db.Boolean, default=False)
+
+    def __init__(self, fullname, username, password, email, avatar=None, role='user', is_active=False):
         self.fullname = fullname
-        self.gender = gender
-        self.class_name = class_name
         self.username = username
         self.email = email
         self.password = password
@@ -53,7 +48,7 @@ class Books(db.Model):
     file_path = db.Column(db.String(255), default=None)
     average_rating = db.Column(db.Float, default=0)
 
-    def __init__(self, category_id, title, publish_year, author, publisher, summary=None, cover=None, view_count=0, download_count=0,  file_path=None, average_rating=0):
+    def __init__(self, category_id, title, publish_year, author, publisher, summary=None, cover=None, view_count=0, download_count=0, file_path=None, average_rating=0):
         self.category_id = category_id
         self.title = title
         self.publish_year = publish_year
@@ -68,7 +63,7 @@ class Books(db.Model):
 
 
 class Category(db.Model):
-    __table_name__ = 'category'
+    __tablename__ = 'category'
 
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(50), nullable=False)
@@ -83,53 +78,47 @@ class Comments(db.Model):
     __tablename__ = 'comments'
 
     id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey(
-        'books.id'), nullable=False)
-    student_id = db.Column(db.String(10), db.ForeignKey(
-        'students.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_on = db.Column(db.TIMESTAMP, nullable=True,
                            server_default=db.func.current_timestamp())
-    updated_on = db.Column(db.TIMESTAMP, nullable=True,
-                           server_default=db.func.current_timestamp(),
-                           onupdate=db.func.current_timestamp())
+    updated_on = db.Column(db.TIMESTAMP, nullable=True, server_default=db.func.current_timestamp(
+    ), onupdate=db.func.current_timestamp())
 
-    def __init__(self, book_id, student_id, content):
+    def __init__(self, book_id, user_id, content):
         self.book_id = book_id
-        self.student_id = student_id
+        self.user_id = user_id
         self.content = content
 
 
-class favorites(db.Model):
+class Favorites(db.Model):
     __tablename__ = 'favorites'
 
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
-    student_id = db.Column(db.String(10), db.ForeignKey(
-        'students.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     added_on = db.Column(db.TIMESTAMP, nullable=True,
                          server_default=db.func.current_timestamp())
 
-    def __init__(self, book_id, student_id):
+    def __init__(self, book_id, user_id):
         self.book_id = book_id
-        self.student_id = student_id
+        self.user_id = user_id
 
 
-class Rating(db.Model):
+class Ratings(db.Model):
     __tablename__ = 'ratings'
 
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
-    student_id = db.Column(db.String(10), db.ForeignKey(
-        'students.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
     created_on = db.Column(db.TIMESTAMP, nullable=True,
                            server_default=db.func.current_timestamp())
-    updated_on = db.Column(db.TIMESTAMP, nullable=True,
-                           server_default=db.func.current_timestamp(),
-                           onupdate=db.func.current_timestamp())
+    updated_on = db.Column(db.TIMESTAMP, nullable=True, server_default=db.func.current_timestamp(
+    ), onupdate=db.func.current_timestamp())
 
-    def __init__(self, book_id, student_id, rating):
+    def __init__(self, book_id, user_id, rating):
         self.book_id = book_id
-        self.student_id = student_id
+        self.user_id = user_id
         self.rating = rating

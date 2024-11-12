@@ -1,87 +1,88 @@
 from flask import request, jsonify
 from ..db import db
-from ..library_ma import StudentSchema
-from ..models import Students
+from ..models import Users
 from werkzeug.utils import secure_filename
 import os
 
-student_schema = StudentSchema()
-students_schema = StudentSchema(many=True)
 
-
-def add_student_service(data):
-    errors = student_schema.validate(data)
+def add_user_service():
+    data = request.form
+    errors = []
+    if not data.get('fullname') or not data.get('username') or not data.get('email') or not data.get('password'):
+        errors.append("All fields are required.")
     if errors:
         return {"errors": errors}, 400
 
     try:
-        new_student = Students(
+        new_user = Users(
             fullname=data['fullname'],
-            gender=data['gender'],
             username=data['username'],
             email=data['email'],
             password=data['password']
         )
-        db.session.add(new_student)
+        db.session.add(new_user)
         db.session.commit()
 
-        return new_student, 201
+        return {"message": "User added successfully", "user": new_user}, 201
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
 
 
-def get_all_students_service():
-    all_students = Students.query.all()
-    return all_students  # Trả về danh sách đối tượng sinh viên
+def get_all_users_service():
+    all_users = Users.query.all()
+    return all_users
 
 
-def get_student_by_id_service(id):
-    student = Students.query.get(id)
-    if not student:
-        return None, 404
-    return student  # Trả về đối tượng sinh viên
+def get_user_by_id_service(id: int):
+    user = Users.query.get(id)
+    if not user:
+        return {"error": "User not found"}, 404
+    return user
 
 
-def update_student_service(id):
-    student = Students.query.get(id)
-    if not student:
-        return None, 404
+def update_user_service(id: int):
+    user = Users.query.get(id)
+    if not user:
+        return {"error": "User not found"}, 404
 
     data = request.form  # Use form data
-    errors = student_schema.validate(data)
+    errors = []
+    if 'fullname' not in data or 'username' not in data or 'email' not in data:
+        errors.append("Required fields are missing.")
     if errors:
         return {"errors": errors}, 400
 
     try:
         for key, value in data.items():
-            setattr(student, key, value)
+            if hasattr(user, key):
+                setattr(user, key, value)
 
         db.session.commit()
-        return student_schema.jsonify(student), 200
+        return {"message": "User updated successfully"}, 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
 
 
-def delete_student_service(id):
-    student = Students.query.get(id)
-    if not student:
-        return None, 404
+def delete_user_service(id: int):
+    user = Users.query.get(id)
+    if not user:
+        return {"error": "User not found"}, 404
 
     try:
-        db.session.delete(student)
+        db.session.delete(user)
         db.session.commit()
-        return {"message": "Student deleted successfully"}, 200
+        return {"message": "User deleted successfully"}, 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
 
 
-def change_password_service(id, data):
-    student = Students.query.get(id)
-    if not student:
-        return None, 404
+def change_password_service(id: int, data: dict):
+    user = Users.query.get(id)
+    if not user:
+        return {"error": "User not found"}, 404
 
     if 'password' not in data or 'confirm_password' not in data:
         return {"error": "Password and confirm password are required."}, 400
@@ -90,9 +91,9 @@ def change_password_service(id, data):
         return {"error": "Passwords do not match."}, 400
 
     try:
-        student.password = data['password']
+        user.password = data['password']
         db.session.commit()
-        return student, 200
+        return {"message": "Password changed successfully"}, 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
@@ -105,10 +106,10 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def upload_avatar_service(id):
-    student = Students.query.get(id)
-    if not student:
-        return {"error": "Student not found"}, 404
+def upload_avatar_service(id: int):
+    user = Users.query.get(id)
+    if not user:
+        return {"error": "User not found"}, 404
 
     avatar = request.files.get('avatar')
     if not avatar or avatar.filename == '':
@@ -124,10 +125,10 @@ def upload_avatar_service(id):
     try:
         # Save the avatar image file
         avatar.save(save_path)
-        student.avatar = avatar_path.replace(os.sep, '/')
+        user.avatar = avatar_path.replace(os.sep, '/')
         db.session.commit()
 
-        return {"message": "Avatar uploaded successfully.", "avatar_url": student.avatar}, 200
+        return {"message": "Avatar uploaded successfully.", "avatar_url": user.avatar}, 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
