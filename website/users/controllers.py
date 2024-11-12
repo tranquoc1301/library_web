@@ -115,10 +115,12 @@ def upload_avatar_service(id: int):
 
     avatar = request.files.get('avatar')
     if not avatar or avatar.filename == '':
-        return {"error": "No file selected."}, 400
-
+        flash("Please select an avatar file.", "error")
+        return "", 400
     if not allowed_file(avatar.filename):
-        return {"error": "Invalid file type. Only PNG, JPG, JPEG, and GIF are allowed."}, 400
+        flash(
+            "Invalid file format. Only PNG, JPG, JPEG, and GIF files are allowed.", "error")
+        return "", 400
 
     filename = secure_filename(avatar.filename)
     avatar_path = os.path.join('avatars', filename)
@@ -129,8 +131,8 @@ def upload_avatar_service(id: int):
         avatar.save(save_path)
         user.avatar = avatar_path.replace(os.sep, '/')
         db.session.commit()
-
-        return {"message": "Avatar uploaded successfully.", "avatar_url": user.avatar}, 200
+        flash("Avatar uploaded successfully", "success")
+        return "", 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500

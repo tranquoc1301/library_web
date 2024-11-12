@@ -37,7 +37,7 @@ def get_favorites_books_by_user_id_service(user_id: int):
     favorites_list = Favorites.query.filter_by(user_id=user_id).all()
 
     if not favorites_list:
-        abort(404, description="No favorite book found for this user")
+        return []
 
     favorite_book_ids = [favorite.book_id for favorite in favorites_list]
 

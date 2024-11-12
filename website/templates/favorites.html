@@ -22,15 +22,17 @@
       type="image/x-icon"
     />
   </head>
-  <body>
+  <body class="d-flex flex-column min-vh-100">
     {% include 'header.html' %} {% include 'notification.html' %}
+
     <div class="container bg-title d-flex align-items-center">
       <h1 class="ps-5">Favorite Books</h1>
     </div>
 
-    <main class="mt-5">
+    <main class="mt-5 flex-grow-1">
       <div class="container">
         <div class="books-wrapper">
+          {% if books %}
           <div class="row g-4 mt-2">
             {% for book in books %}
             <div class="col-2 position-relative">
@@ -39,7 +41,6 @@
                 class="position-absolute top-0 end-0 mt-2"
                 style="margin-right: 12px"
               >
-                <!-- If the book is in favorites, show Remove button -->
                 <form
                   action="{{ url_for('views.remove_from_favorites', book_id=book.id) }}"
                   method="POST"
@@ -78,6 +79,12 @@
             </div>
             {% endfor %}
           </div>
+          {% else %}
+          <div class="text-center mt-5">
+            <p class="fs-4">No favorite books yet.</p>
+            <p class="text-muted">Start adding books to your favorites list!</p>
+          </div>
+          {% endif %}
         </div>
       </div>
     </main>

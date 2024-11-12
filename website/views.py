@@ -104,16 +104,17 @@ def profile():
 
 
 @views.route('/user/profile/upload-avatar', methods=['POST'])
-@role_required('user')
+@role_required(['user', 'admin'])
 def upload_avatar():
     user_id = session.get('user_id')
-    return user_controllers.upload_avatar_service(user_id)
-
+    message, status = user_controllers.upload_avatar_service(user_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
 # Update profile route
 
 
 @views.route('/user/profile/update', methods=['POST'])
-@role_required('user')
+@role_required(['user', 'admin'])
 def update_profile():
     user_id = session.get('user_id')
     message, status = user_controllers.update_user_service(user_id)

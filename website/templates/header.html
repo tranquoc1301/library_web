@@ -112,6 +112,7 @@
                     <i class="fa-solid fa-address-card me-2"></i> Profile
                   </a>
                 </li>
+                {% if g.user and g.user.role == 'user' %}
                 <li>
                   <a
                     class="dropdown-item d-flex align-items-center text-light"
@@ -120,6 +121,7 @@
                     <i class="fa-solid fa-star me-2"></i> Favorites
                   </a>
                 </li>
+                {% endif %}
                 <li>
                   <a
                     class="dropdown-item d-flex align-items-center text-light"
