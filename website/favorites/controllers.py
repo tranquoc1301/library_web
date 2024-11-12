@@ -17,7 +17,7 @@ def add_favorite_service(book_id, user_id):
         existing_favorite = Favorites.query.filter_by(
             book_id=book_id, user_id=user_id).first()
         if existing_favorite:
-            flash("Book already added to favorites", "info")
+            flash("Book already added to favorites", "warning")
             return "", 200
 
         new_favorite = Favorites(book_id=book_id, user_id=user_id)

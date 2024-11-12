@@ -93,7 +93,7 @@
                 aria-expanded="false"
               >
                 <img
-                  src="{{ url_for('static', filename=user.avatar) if user.avatar else url_for('static', filename='images/user.png') }}"
+                  src="{{ url_for('static', filename=g.user.avatar) if g.user and g.user.avatar else url_for('static', filename='images/user.png') }}"
                   alt="User Avatar"
                   width="40"
                   height="40"

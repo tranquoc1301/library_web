@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, flash
 from ..db import db
 from ..models import Users
 from werkzeug.utils import secure_filename
@@ -22,8 +22,8 @@ def add_user_service():
         )
         db.session.add(new_user)
         db.session.commit()
-
-        return {"message": "User added successfully", "user": new_user}, 201
+        flash("User added successfully", "success")
+        return "", 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
@@ -59,7 +59,8 @@ def update_user_service(id: int):
                 setattr(user, key, value)
 
         db.session.commit()
-        return {"message": "User updated successfully"}, 200
+        flash("User updated successfully", "success")
+        return "", 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500
@@ -73,7 +74,8 @@ def delete_user_service(id: int):
     try:
         db.session.delete(user)
         db.session.commit()
-        return {"message": "User deleted successfully"}, 200
+        flash("User deleted successfully", "success")
+        return "", 200
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 500

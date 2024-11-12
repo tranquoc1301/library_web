@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, flash, request
+from flask import Blueprint, render_template, session, redirect, url_for, flash, request, g
 from .models import Books, Category, Favorites
 from .books import controllers as book_controllers
 from .category import controllers as category_controllers
@@ -22,7 +22,7 @@ def index():
         category.book_count = len(
             book_controllers.get_books_by_category_id_service(category.id))
 
-    return render_template('index.html', books=books, categories=categories, user=user if user else None)
+    return render_template('index.html', books=books, categories=categories, user=user)
 
 # Books listing route
 
@@ -116,7 +116,9 @@ def upload_avatar():
 @role_required('user')
 def update_profile():
     user_id = session.get('user_id')
-    return user_controllers.update_user_service(user_id)
+    message, status = user_controllers.update_user_service(user_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
 
 # Favorite books route
 
@@ -164,3 +166,12 @@ def unauthorized(e):
 @views.app_errorhandler(403)
 def forbidden(e):
     return render_template('403.html'), 403
+
+
+@views.before_request
+def load_user():
+    user_id = session.get('user_id')
+    if user_id:
+        g.user = user_controllers.get_user_by_id_service(user_id)
+    else:
+        g.user = None
