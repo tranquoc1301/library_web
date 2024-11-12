@@ -1,0 +1,45 @@
+/* Footer Background */
+.bg-dark {
+  background-color: #1c1c1c;
+}
+
+/* Footer General Styles */
+#footer {
+  color: #b0b0b0;
+  padding-top: 30px;
+}
+#footer .footer-title {
+  font-weight: bold;
+  color: #e0e0e0;
+}
+#footer .footer-logo h5 {
+  margin-top: 0.5rem;
+  font-size: 1.25rem;
+  color: #f0f0f0;
+}
+
+/* Footer Links */
+.footer-link {
+  color: #b0b0b0;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.footer-link:hover {
+  color: #ffffff;
+}
+
+/* Contact Text */
+.footer-contact {
+  margin: 0;
+  color: #888888;
+}
+
+/* Social Icons */
+.footer-icon {
+  font-size: 1.4rem;
+  color: #b0b0b0;
+  transition: color 0.3s ease;
+}
+.footer-icon:hover {
+  color: #ffffff;
+}

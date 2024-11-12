@@ -1,63 +1,75 @@
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/footer.css') }}"
+/>
 <div id="footer">
-  <footer class="container-fluid bg-main">
-    <div
-      class="d-flex container mt-5 justify-content-between py-4 px-4 flex-column flex-md-row align-items-center"
-    >
-      <div class="text-white mb-3 mb-md-0 text-center text-md-left">
-        Copyright © 2024. All rights reserved.
+  <footer class="container-fluid bg-dark text-white py-4 mt-6">
+    <div class="container">
+      <div class="row">
+        <!-- First Section: Logo & Social Media Icons -->
+        <div class="col-12 col-md-4 mb-4 mb-md-0 text-center text-md-start">
+          <div class="footer-logo mb-3">
+            <img
+              src="{{ url_for('static', filename='images/logo-icon.svg') }}"
+              alt="Logo"
+              width="60"
+              height="60"
+              class="mb-2"
+            />
+            <span class="fs-3 ms-2" style="color: #ffffff">Library</span>
+          </div>
+          <div class="d-flex justify-content-center justify-content-md-start">
+            <a href="#!" class="footer-icon me-3"
+              ><i class="fab fa-facebook-f"></i
+            ></a>
+            <a href="#!" class="footer-icon me-3"
+              ><i class="fab fa-twitter"></i
+            ></a>
+            <a href="#!" class="footer-icon me-3"
+              ><i class="fab fa-google"></i
+            ></a>
+            <a href="#!" class="footer-icon"
+              ><i class="fab fa-linkedin-in"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- Second Section: Explore Header & Navigation Links -->
+        <div class="col-12 col-md-4 mb-4 mb-md-0 text-center text-md-start">
+          <h5 class="footer-title">Explore</h5>
+          <ul class="list-unstyled mt-2">
+            <li>
+              <a href="{{ url_for('views.index') }}" class="footer-link"
+                >Home</a
+              >
+            </li>
+            <li>
+              <a href="{{ url_for('views.books') }}" class="footer-link"
+                >Books</a
+              >
+            </li>
+            <li>
+              <a href="{{ url_for('views.category') }}" class="footer-link"
+                >Categories</a
+              >
+            </li>
+          </ul>
+        </div>
+
+        <!-- Third Section: Contact Information -->
+        <div class="col-12 col-md-4 text-center text-md-start">
+          <h5 class="footer-title">Contact Us</h5>
+          <p class="footer-contact">Email: dutlibrary1301@gmail.com</p>
+          <p class="footer-contact">Phone: +1 (123) 456-7890</p>
+        </div>
       </div>
-      <div class="d-flex justify-content-center justify-content-md-end">
-        <a
-          href="#!"
-          class="text-white me-4 footer-icon"
-          style="font-size: 1.5rem"
-        >
-          <i class="fab fa-facebook-f"></i>
-        </a>
-        <a
-          href="#!"
-          class="text-white me-4 footer-icon"
-          style="font-size: 1.5rem"
-        >
-          <i class="fab fa-twitter"></i>
-        </a>
-        <a
-          href="#!"
-          class="text-white me-4 footer-icon"
-          style="font-size: 1.5rem"
-        >
-          <i class="fab fa-google"></i>
-        </a>
-        <a href="#!" class="text-white footer-icon" style="font-size: 1.5rem">
-          <i class="fab fa-linkedin-in"></i>
-        </a>
+
+      <!-- Copyright Section -->
+      <div class="row mt-4">
+        <div class="col-12 text-center">
+          <p class="mb-0">&copy; 2024 Library. All rights reserved.</p>
+        </div>
       </div>
     </div>
   </footer>
 </div>
-
-<style>
-  .bg-main {
-    background-color: #42a5f5; /* Color nền đẹp và hiện đại */
-  }
-
-  .footer-icon {
-    transition: transform 0.3s ease, color 0.3s ease;
-  }
-
-  .footer-icon:hover {
-    transform: scale(1.2); /* Tăng kích thước icon khi hover */
-    color: #fff; /* Màu sắc icon thay đổi khi hover */
-  }
-
-  footer {
-    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1); /* Thêm bóng nhẹ cho footer */
-  }
-
-  /* Đảm bảo footer phù hợp với màn hình nhỏ */
-  @media (max-width: 768px) {
-    .footer-icon {
-      font-size: 1.2rem;
-    }
-  }
-</style>

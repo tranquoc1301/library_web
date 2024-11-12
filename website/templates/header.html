@@ -26,10 +26,10 @@
           <img
             src="{{ url_for('static', filename='images/logo-icon.svg') }}"
             alt="Library Logo"
-            width="50"
-            height="50"
+            width="60"
+            height="60"
           />
-          <span class="fs-4 ms-2">Library</span>
+          <span class="fs-3 ms-2" style="color: #ffffff">Library</span>
         </a>
 
         <button
@@ -93,7 +93,7 @@
                 aria-expanded="false"
               >
                 <img
-                  src="{{ url_for('static', filename='images/user.png') }}"
+                  src="{{ url_for('static', filename=user.avatar) if user.avatar else url_for('static', filename='images/user.png') }}"
                   alt="User Avatar"
                   width="40"
                   height="40"
@@ -101,35 +101,47 @@
                 />
               </a>
               <ul
-                class="dropdown-menu dropdown-menu-end"
+                class="dropdown-menu dropdown-menu-user dropdown-menu-end bg-dark text-light"
                 aria-labelledby="userDropdown"
               >
-                <li class="dropdown-item d-flex align-items-center">
-                  <i class="fa-solid fa-address-card me-2"></i>
+                <li>
                   <a
+                    class="dropdown-item d-flex align-items-center text-light"
                     href="{{ url_for('views.profile', user_id=session['user_id']) }}"
-                    >Profile</a
                   >
+                    <i class="fa-solid fa-address-card me-2"></i> Profile
+                  </a>
                 </li>
-                <li class="dropdown-item d-flex align-items-center">
-                  <i class="fa-solid fa-star me-2"></i>
+                <li>
                   <a
+                    class="dropdown-item d-flex align-items-center text-light"
                     href="{{ url_for('views.favorites', user_id=session['user_id']) }}"
-                    >Favorites</a
                   >
+                    <i class="fa-solid fa-star me-2"></i> Favorites
+                  </a>
                 </li>
-                <li class="dropdown-item d-flex align-items-center">
-                  <i class="fa-solid fa-lock me-2"></i>
-                  <a href="{{ url_for('auth.change_password') }}"
-                    >Change Password</a
+                <li>
+                  <a
+                    class="dropdown-item d-flex align-items-center text-light"
+                    href="{{ url_for('auth.change_password') }}"
                   >
+                    <i class="fa-solid fa-lock me-2"></i> Change Password
+                  </a>
                 </li>
-                <li class="dropdown-item d-flex align-items-center logout-btn">
-                  <i class="fa-solid fa-right-from-bracket me-2"></i>
-                  <a href="{{ url_for('auth.logout') }}">Logout</a>
+                <li>
+                  <hr class="dropdown-divider border-secondary" />
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item d-flex align-items-center text-light logout-btn"
+                    href="{{ url_for('auth.logout') }}"
+                  >
+                    <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
+                  </a>
                 </li>
               </ul>
             </div>
+
             {% else %}
             <!-- Login and Register Buttons for Guests -->
             <a

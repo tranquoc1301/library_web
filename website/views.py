@@ -14,6 +14,7 @@ views = Blueprint('views', __name__)
 
 @views.route('/', methods=['GET'])
 def index():
+    user = user_controllers.get_user_by_id_service(session.get('user_id'))
     books = book_controllers.get_all_books_service()[:6]
     categories = category_controllers.get_all_categories_service()[:5]
 
@@ -21,7 +22,7 @@ def index():
         category.book_count = len(
             book_controllers.get_books_by_category_id_service(category.id))
 
-    return render_template('index.html', books=books, categories=categories)
+    return render_template('index.html', books=books, categories=categories, user=user if user else None)
 
 # Books listing route
 
