@@ -6,6 +6,7 @@ from .users import controllers as user_controllers
 from .favorites import controllers as favorite_controllers
 from .comments import controllers as comment_controllers
 from .services.authorize import role_required
+from .db import db
 
 # Create a blueprint for the routes
 views = Blueprint('views', __name__)
@@ -44,7 +45,7 @@ def book_detail(book_id):
     comments = comment_controllers.get_comments_by_book_id_service(book_id)
     users = {comment.user_id: user_controllers.get_user_by_id_service(
         comment.user_id) for comment in comments}
-    
+
     return render_template('book_detail.html', book=book, comments=comments, users=users)
 
 # Search books by title
@@ -70,6 +71,11 @@ def books_by_category_id(category_id):
 @views.route('/books/<int:book_id>/read', methods=['GET'])
 @role_required(['user', 'admin'])
 def read_book(book_id):
+    book = Books.query.get(book_id)
+    if book:
+        # Cập nhật số lượt xem
+        book.view_count += 1
+        db.session.commit()
     return book_controllers.load_pdf_service(book_id)
 
 
@@ -79,6 +85,11 @@ def download_book(book_id):
     user_id = session.get('user_id')
     user = user_controllers.get_user_by_id_service(user_id)
     if user.is_active == True:
+        book = Books.query.get(book_id)
+        if book:
+            # Cập nhật số lượt download
+            book.download_count += 1
+            db.session.commit()
         return book_controllers.download_book_service(book_id)
     else:
         flash("Your account is not activated. Please activate your account in Profile to use this feature.", category="warning")

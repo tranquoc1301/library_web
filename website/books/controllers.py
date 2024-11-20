@@ -58,6 +58,20 @@ def get_book_by_id_service(id):
     return book  # Trả về đối tượng sách cho template
 
 
+def get_views_by_id_service(id):
+    book = Books.query.get(id)
+    if not book:
+        abort(404, description="Book not found")
+    return book.view_count
+
+
+def get_downloads_by_id_service(id):
+    book = Books.query.get(id)
+    if not book:
+        abort(404, description="Book not found")
+    return book.download_count
+
+
 def get_all_books_service():
     book_list = Books.query.all()
     return book_list

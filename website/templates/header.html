@@ -48,15 +48,33 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('views.index') }}">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('views.category') }}"
-                >Categories</a
+              <a
+                class="nav-link d-flex align-items-center"
+                href="{{ url_for('views.index') }}"
               >
+                <i
+                  class="fa-sharp fa-solid fa-house me-2"
+                  style="transform: translateY(-1px)"
+                ></i>
+                Home
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a
+                class="nav-link d-flex align-items-center"
+                href="{{ url_for('views.category') }}"
+              >
+                <i class="fa-solid fa-th-large me-2"></i> Categories
+              </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('views.books') }}">Books</a>
+              <a
+                class="nav-link d-flex align-items-center"
+                href="{{ url_for('views.books') }}"
+              >
+                <i class="fa-solid fa-book me-2"></i> Books
+              </a>
             </li>
           </ul>
 
@@ -75,6 +93,9 @@
                   placeholder="Search for books..."
                   aria-label="Search"
                 />
+                <button class="btn btn-outline-secondary" type="submit">
+                  <i class="fa-solid fa-search"></i>
+                </button>
               </div>
             </form>
           </div>
@@ -130,9 +151,7 @@
                     <i class="fa-solid fa-lock me-2"></i> Change Password
                   </a>
                 </li>
-                <li>
-                  <hr class="dropdown-divider border-secondary" />
-                </li>
+                <li><hr class="dropdown-divider border-secondary" /></li>
                 <li>
                   <a
                     class="dropdown-item d-flex align-items-center text-light logout-btn"
@@ -143,19 +162,20 @@
                 </li>
               </ul>
             </div>
-
             {% else %}
             <!-- Login and Register Buttons for Guests -->
             <a
               href="{{ url_for('auth.login_page') }}"
               class="btn btn-login rounded-pill px-4 me-2"
-              >Login</a
             >
+              <i class="fa-solid fa-sign-in-alt me-2"></i>Login
+            </a>
             <a
               href="{{ url_for('auth.signup_page') }}"
               class="btn btn-register rounded-pill px-4"
-              >Register</a
             >
+              <i class="fa-solid fa-user-plus me-2"></i>Register
+            </a>
             {% endif %}
           </div>
         </div>
