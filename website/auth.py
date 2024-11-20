@@ -50,6 +50,7 @@ def signup():
     email = request.form.get('email')
     password = request.form.get('password')
     confirm_password = request.form.get('confirm_password')
+    avatar = "avatars/user.png"
 
     if password != confirm_password:
         return jsonify({"error": "Passwords do not match."}), 400
@@ -62,6 +63,7 @@ def signup():
         fullname=fullname,
         username=username,
         email=email,
+        avatar=avatar,
         password=hashed_password,
         is_active=False
     )

@@ -1,9 +1,10 @@
-body {
+/* Giới hạn tất cả các quy tắc vào lớp .book-detail */
+.book-detail body {
   background-color: #f3f6f9;
   color: #333;
 }
 
-.bg-book {
+.book-detail .bg-book {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
@@ -11,30 +12,30 @@ body {
   margin-top: 32px;
 }
 
-.text-light {
+.book-detail .custom-text-light {
   color: #333 !important;
 }
 
-.title {
+.book-detail .title {
   font-size: 32px;
   font-weight: 600;
   color: #2c3e50;
   margin-bottom: 16px;
 }
 
-.container {
+.book-detail .custom-container {
   display: flex;
   align-items: start;
   gap: 32px;
 }
 
-.container img {
+.book-detail .custom-container img {
   border-radius: 12px;
   object-fit: cover;
   box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
 }
 
-.btn {
+.book-detail .custom-btn {
   border-radius: 30px;
   padding: 16px 32px;
   font-size: 16px;
@@ -43,29 +44,29 @@ body {
   font-family: "Poppins", Arial, sans-serif;
 }
 
-.btn-read {
+.book-detail .btn-read {
   background-color: #3498db;
   color: #fff;
   border: 1px solid transparent;
   border-radius: 10px;
 }
 
-.btn-read:hover {
+.book-detail .btn-read:hover {
   background-color: #2980b9;
 }
 
-.btn-download {
+.book-detail .btn-download {
   background-color: #2ecc71;
   color: #fff;
   border: 1px solid transparent;
   border-radius: 10px;
 }
 
-.btn-download:hover {
+.book-detail .btn-download:hover {
   background-color: #27ae60;
 }
 
-.category {
+.book-detail .category {
   background-color: #e67e22;
   color: #fff;
   font-weight: 500;
@@ -76,27 +77,27 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.category:hover {
+.book-detail .category:hover {
   background-color: #d35400;
 }
 
 /* Cải thiện biểu tượng */
-.views,
-.downloads {
+.book-detail .views,
+.book-detail .downloads {
   font-weight: bold;
   font-size: 16px;
 }
 
-.fa-eye,
-.fa-download {
+.book-detail .fa-eye,
+.book-detail .fa-download {
   margin-right: 6px;
   color: #3498db;
   font-size: 20px;
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
-.fa-eye:hover,
-.fa-download:hover {
+.book-detail .fa-eye:hover,
+.book-detail .fa-download:hover {
   color: #2980b9;
   transform: scale(1.2);
 }

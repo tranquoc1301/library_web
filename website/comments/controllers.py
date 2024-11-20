@@ -1,32 +1,24 @@
-from flask import request, jsonify, abort
+from flask import request, jsonify, abort, flash
 from ..db import db
 from ..library_ma import CommentSchema
 from ..models import Comments
 
-comment_schema = CommentSchema()
-comments_schema = CommentSchema(many=True)
 
-
-def add_comment_service():
-    data = request.form  # Get form data instead of JSON
-
-    errors = comment_schema.validate(data)  # Validating the form data
-    if errors:
-        return jsonify({"errors": errors}), 400
-
+def add_comment_service(book_id, user_id, content):
     try:
         new_comment = Comments(
-            book_id=data.get('book_id'),
-            user_id=data.get('user_id'),
-            content=data.get('content')
+            book_id=book_id,
+            user_id=user_id,
+            content=content.strip(),
         )
-
         db.session.add(new_comment)
         db.session.commit()
-        return comment_schema.jsonify(new_comment), 201
+        flash("Comment added successfully", "success")
+        return "", 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash("Failed to add comment", "error")
+        return "", 500
 
 
 def get_all_comments_service():
@@ -41,28 +33,31 @@ def get_comment_service(id):
     return comment  # Trả về đối tượng bình luận cho template
 
 
-def update_comment_service(id: int):
+def get_comments_by_book_id_service(book_id):
+    comments = Comments.query.filter_by(book_id=book_id).all()
+    return comments
+
+
+def get_comments_by_user_id_service(user_id):
+    comments = Comments.query.filter_by(user_id=user_id).all()
+    return comments
+
+
+def update_comment_service(id, content):
     comment = Comments.query.get(id)
     if not comment:
         abort(404, description="Comment not found")
 
-    data = request.form  # Use form data instead of JSON
-
-    errors = comment_schema.validate(data)  # Validate the form data
-    if errors:
-        return jsonify({"errors": errors}), 400
-
     try:
-        for key, value in data.items():
-            if getattr(comment, key) != value:
-                setattr(comment, key, value)
-
+        comment.content = content.strip()
         db.session.commit()
-        return comment_schema.jsonify(comment), 200
+        flash("Comment updated successfully", "success")
+        return "", 200
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash("Failed to update comment", "error")
+        return "", 500
 
 
 def delete_comment_service(id):
@@ -73,8 +68,10 @@ def delete_comment_service(id):
     try:
         db.session.delete(comment)
         db.session.commit()
-        return jsonify({"message": "Comment deleted successfully"}), 200
+        flash("Comment deleted successfully", "success")
+        return "", 200
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash("Failed to delete comment", "error")
+        return "", 500

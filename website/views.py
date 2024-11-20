@@ -4,6 +4,7 @@ from .books import controllers as book_controllers
 from .category import controllers as category_controllers
 from .users import controllers as user_controllers
 from .favorites import controllers as favorite_controllers
+from .comments import controllers as comment_controllers
 from .services.authorize import role_required
 
 # Create a blueprint for the routes
@@ -40,7 +41,11 @@ def book_detail(book_id):
     book = book_controllers.get_book_by_id_service(book_id)
     book.category_name = category_controllers.get_category_by_id_service(
         book.category_id).category
-    return render_template('book_detail.html', book=book)
+    comments = comment_controllers.get_comments_by_book_id_service(book_id)
+    users = {comment.user_id: user_controllers.get_user_by_id_service(
+        comment.user_id) for comment in comments}
+    
+    return render_template('book_detail.html', book=book, comments=comments, users=users)
 
 # Search books by title
 
@@ -130,7 +135,7 @@ def favorites():
     user_id = session.get('user_id')
     favorites_books = favorite_controllers.get_favorites_books_by_user_id_service(
         user_id)
-    return render_template('favorites.html', books=favorites_books)
+    return render_template('user/favorites.html', books=favorites_books)
 
 # Add to favorites route
 
@@ -157,6 +162,35 @@ def remove_from_favorites(book_id):
     return redirect(request.referrer)
 
 # Error handler
+
+
+@views.route('/book/<book_id>/comments', methods=['POST'])
+@role_required('user')
+def add_comment(book_id):
+    user_id = session.get('user_id')
+    content = request.form.get('content')
+    message, status = comment_controllers.add_comment_service(
+        book_id, user_id, content)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/books/<int:book_id>/comments/<int:comment_id>/edit', methods=['POST'])
+@role_required('user')
+def edit_comment(book_id, comment_id):
+    content = request.form.get('content')
+    message, status = comment_controllers.update_comment_service(
+        comment_id, content)
+    flash(message, category="success" if status == 200 else "error")
+    return redirect(url_for('views.book_detail', book_id=book_id))
+
+
+@views.route('/books/<int:book_id>/comments/<int:comment_id>/delete', methods=['POST'])
+@role_required('user')
+def delete_comment(book_id, comment_id):
+    message, status = comment_controllers.delete_comment_service(comment_id)
+    flash(message, category="success" if status == 200 else "error")
+    return redirect(request.referrer)
 
 
 @views.app_errorhandler(401)
