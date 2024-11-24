@@ -1,0 +1,481 @@
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/sidebar.css') }}"
+/>
+
+{% include 'notification.html' %} 
+{% include 'admin/sidebar.html' %}
+
+<div class="container-fluid py-4" style="padding-left: 260px">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary">Manage Books</h2>
+    <a
+      class="btn btn-success btn-lg"
+      href="#addBookModal"
+      data-bs-toggle="modal"
+    >
+      <i class="fas fa-plus me-2"></i>Add New Book
+    </a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Books List</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Publish Year</th>
+            <th>Author</th>
+            <th>Publisher</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for book in books %}
+          <tr>
+            <td>{{ book.id }}</td>
+            <td>{{ book.title }}</td>
+            <td>{{ categories[book.category_id - 1].category }}</td>
+            <td>{{ book.publish_year }}</td>
+            <td>{{ book.author }}</td>
+            <td>{{ book.publisher }}</td>
+            <td class="text-center">
+              <!-- Edit Button -->
+              <button
+                class="btn btn-sm btn-outline-primary me-2"
+                title="Edit"
+                data-bs-toggle="modal"
+                data-bs-target="#updateBookModal{{ book.id }}"
+                data-id="{{ book.id }}"
+                data-title="{{ book.title }}"
+                data-category="{{ book.category_id }}"
+                data-publish_year="{{ book.publish_year }}"
+                data-author="{{ book.author }}"
+                data-publisher="{{ book.publisher }}"
+                data-summary="{{ book.summary }}"
+                data-cover="{{ url_for('static', filename=book.cover) }}"
+              >
+                <i class="fas fa-pen"></i>
+              </button>
+
+              <!-- Delete Button -->
+              <form
+                action="{{ url_for('views.delete_book', book_id=book.id) }}"
+                method="POST"
+                class="d-inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-sm btn-outline-danger"
+                  title="Delete"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination Section -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if current_page > 1 %}
+      <li class="page-item">
+        <a
+          class="page-link"
+          href="?page={{ current_page - 1 }}"
+          aria-label="Previous"
+        >
+          &laquo;
+        </a>
+      </li>
+      {% endif %} {% for page in range(1, total_pages + 1) %}
+      <li class="page-item {% if page == current_page %}active{% endif %}">
+        <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+      </li>
+      {% endfor %} {% if current_page < total_pages %}
+      <li class="page-item">
+        <a
+          class="page-link"
+          href="?page={{ current_page + 1 }}"
+          aria-label="Next"
+        >
+          &raquo;
+        </a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+<!-- Modal for Add New Book -->
+<div
+  class="modal fade"
+  id="addBookModal"
+  tabindex="-1"
+  aria-labelledby="addBookModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form
+        action="{{ url_for('views.add_book') }}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="modal-header">
+          <h5 class="modal-title text-primary" id="addBookModalLabel">
+            Add New Book
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-md-4 text-center">
+              <div class="mb-3">
+                <img
+                  id="coverPreview"
+                  src="https://via.placeholder.com/300"
+                  alt="Cover Preview"
+                  class="img-fluid rounded mb-3"
+                  style="max-height: 300px; object-fit: cover"
+                />
+              </div>
+              <input
+                type="file"
+                class="form-control"
+                id="cover"
+                name="cover"
+                accept="image/*"
+                onchange="previewCover()"
+              />
+            </div>
+            <div class="col-md-8">
+              <!-- Input fields for Book Details -->
+              <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="title"
+                  name="title"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select
+                  class="form-select"
+                  id="category"
+                  name="category"
+                  required
+                >
+                  <option disabled selected>Select category</option>
+                  {% for category in categories %}
+                  <option value="{{ category.id }}">
+                    {{ category.category }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="publish_year" class="form-label"
+                  >Publish Year</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="publish_year"
+                  name="publish_year"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="author" class="form-label">Author</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="author"
+                  name="author"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="publisher" class="form-label">Publisher</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="publisher"
+                  name="publisher"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="summary" class="form-label">Summary</label>
+                <textarea
+                  class="form-control"
+                  id="summary"
+                  name="summary"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="pdf" class="form-label">Upload PDF</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="pdf"
+                  name="pdf"
+                  accept=".pdf"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="submit" class="btn btn-success">Add Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% for book in books %}
+<!-- Modal for Update Book -->
+<div
+  class="modal fade"
+  id="updateBookModal{{ book.id }}"
+  tabindex="-1"
+  aria-labelledby="updateBookModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form
+        id="updateBookForm"
+        action="{{ url_for('views.update_book', book_id=book.id) }}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="modal-header">
+          <h5 class="modal-title text-primary" id="updateBookModalLabel">
+            Update Book
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="bookId" name="book_id" />
+
+          <div class="row g-4">
+            <div class="col-md-4 text-center">
+              <img
+                id="coverPreviewUpdate"
+                src="https://via.placeholder.com/150"
+                alt="Cover Preview"
+                class="img-fluid rounded mb-3"
+                style="max-height: 300px; object-fit: cover"
+              />
+              <input
+                type="file"
+                class="form-control"
+                id="coverUpdate"
+                name="cover"
+                accept="image/*"
+                onchange="previewCoverUpdate()"
+              />
+            </div>
+            <div class="col-md-8">
+              <div class="mb-3">
+                <label for="titleUpdate" class="form-label">Title</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="titleUpdate"
+                  name="title"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="categoryUpdate" class="form-label">Category</label>
+                <select
+                  class="form-select"
+                  id="categoryUpdate"
+                  name="category"
+                  required
+                >
+                  <option disabled selected>Select category</option>
+                  {% for category in categories %}
+                  <option value="{{ category.id }}">
+                    {{ category.category }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="publish_yearUpdate" class="form-label"
+                  >Publish Year</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  id="publish_yearUpdate"
+                  name="publish_year"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="authorUpdate" class="form-label">Author</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="authorUpdate"
+                  name="author"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="publisherUpdate" class="form-label"
+                  >Publisher</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="publisherUpdate"
+                  name="publisher"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="summaryUpdate" class="form-label">Summary</label>
+                <textarea
+                  class="form-control"
+                  id="summaryUpdate"
+                  name="summary"
+                  rows="3"
+                  style="resize: none"
+                ></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="pdfUpdate" class="form-label">Upload PDF</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="pdfUpdate"
+                  name="pdf"
+                  accept=".pdf"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary">Update Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+  document.querySelectorAll('[data-bs-toggle="modal"]').forEach((button) => {
+    button.addEventListener("click", function () {
+      const bookId = this.getAttribute("data-id");
+      const title = this.getAttribute("data-title");
+      const category = this.getAttribute("data-category");
+      const publishYear = this.getAttribute("data-publish_year");
+      const author = this.getAttribute("data-author");
+      const publisher = this.getAttribute("data-publisher");
+      const summary = this.getAttribute("data-summary");
+      const cover = this.getAttribute("data-cover");
+
+      // Cập nhật các trường trong modal
+      const modal = document.querySelector(`#updateBookModal${bookId}`);
+      modal.querySelector("#bookId").value = bookId;
+      modal.querySelector("#titleUpdate").value = title;
+      modal.querySelector("#categoryUpdate").value = category;
+      modal.querySelector("#publish_yearUpdate").value = publishYear;
+      modal.querySelector("#authorUpdate").value = author;
+      modal.querySelector("#publisherUpdate").value = publisher;
+      modal.querySelector("#summaryUpdate").value = summary;
+
+      // Nếu có ảnh bìa, cập nhật preview
+      const coverPreview = modal.querySelector("#coverPreviewUpdate");
+      if (cover) {
+        coverPreview.src = cover;
+      } else {
+        // Nếu không có ảnh bìa, hiển thị ảnh mặc định
+        coverPreview.src = "https://via.placeholder.com/150";
+      }
+    });
+  });
+
+  // Preview Cover Image (Add New Book)
+  function previewCover() {
+    const file = document.getElementById("cover").files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = function () {
+      document.getElementById("coverPreview").src = reader.result;
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Preview Cover Image (Update Book)
+  function previewCoverUpdate() {
+    const file = document.getElementById("coverUpdate").files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = function () {
+      document.getElementById("coverPreviewUpdate").src = reader.result;
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  }
+</script>

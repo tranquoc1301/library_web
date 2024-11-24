@@ -152,6 +152,16 @@
                   </a>
                 </li>
                 <li><hr class="dropdown-divider border-secondary" /></li>
+                {% if g.user.role == 'admin' %}
+                <li>
+                  <a
+                    class="dropdown-item d-flex align-items-center text-light"
+                    href="{{ url_for('views.dashboard') }}"
+                  >
+                    <i class="fa-solid fa-gauge me-2"></i> Admin Dashboard
+                  </a>
+                </li>
+                {% endif %}
                 <li>
                   <a
                     class="dropdown-item d-flex align-items-center text-light logout-btn"

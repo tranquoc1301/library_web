@@ -34,6 +34,36 @@ def books():
     books = book_controllers.get_all_books_service()
     return render_template('book.html', books=books)
 
+
+@views.route('/admin/books', methods=['GET'])
+@role_required('admin')
+def admin_books():
+    current_page = request.args.get('page', 1, type=int)
+    books_per_page = 10
+
+    # Fetch all books and categories
+    all_books = book_controllers.get_all_books_service()
+    categories = category_controllers.get_all_categories_service()
+
+    total_books = len(all_books)
+    total_pages = max((total_books + books_per_page - 1) // books_per_page, 1)
+
+    # Prevent invalid page numbers
+    if current_page < 1:
+        current_page = 1
+    elif current_page > total_pages:
+        current_page = total_pages
+
+    # Pagination slicing
+    start = (current_page - 1) * books_per_page
+    end = start + books_per_page
+    books = all_books[start:end]
+
+    return render_template('admin/books.html',
+                           books=books,
+                           categories=categories,
+                           current_page=current_page,
+                           total_pages=total_pages)
 # Book details route
 
 
@@ -95,6 +125,32 @@ def download_book(book_id):
         flash("Your account is not activated. Please activate your account in Profile to use this feature.", category="warning")
     return redirect(request.referrer)
 
+
+@views.route('/books/create', methods=['POST'])
+@role_required('admin')
+def add_book():
+    message, status = book_controllers.add_book_service()
+
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/books/<int:book_id>/update', methods=['POST'])
+@role_required('admin')
+def update_book(book_id):
+    message, status = book_controllers.update_book_service(book_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/books/<int:book_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_book(book_id):
+    message, status = book_controllers.delete_book_service(book_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
 # Categories listing route
 
 
@@ -107,7 +163,80 @@ def category():
 
     return render_template('category.html', categories=categories)
 
+
+@views.route('/admin/categories', methods=['GET'])
+@role_required('admin')
+def admin_categories():
+    categories = category_controllers.get_all_categories_service()
+    return render_template('admin/categories.html', categories=categories)
+
+
+@views.route('/categories/create', methods=['POST'])
+@role_required('admin')
+def add_category():
+    message, status = category_controllers.add_category_service()
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/categories/<int:category_id>/update', methods=['POST'])
+@role_required('admin')
+def update_category(category_id):
+    message, status = category_controllers.update_category_service(category_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+@views.route('/categories/<int:category_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_category(category_id):
+    message, status = category_controllers.delete_category_service(category_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
 # User profile route
+
+@views.route('/admin/users', methods=['GET'])
+@role_required('admin')
+def admin_users():
+    current_page = request.args.get('page', 1, type=int)
+    users_per_page = 10
+    users = user_controllers.get_all_users_service()
+
+    total_users = len(users)
+    total_pages = max((total_users + users_per_page - 1) // users_per_page, 1)
+
+    if current_page < 1:
+        current_page = 1
+    elif current_page > total_pages:
+        current_page = total_pages
+
+    start = (current_page - 1) * users_per_page
+    end = start + users_per_page
+    users = users[start:end]
+    return render_template('admin/users.html', users=users, current_page=current_page, total_pages=total_pages)
+
+@views.route('/admin/users/create', methods=['POST'])
+@role_required('admin')
+def add_user():
+    message, status = user_controllers.add_user_service()
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/admin/users/<int:user_id>/update', methods=['POST'])
+@role_required('admin')
+def update_user(user_id):
+    message, status = user_controllers.update_user_service(user_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/admin/users/<int:user_id>/delete', methods=['POST'])
+@role_required('admin')
+def delete_user(user_id):
+    message, status = user_controllers.delete_user_service(user_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
 
 
 @views.route('/user/profile', methods=['GET'])
@@ -176,7 +305,7 @@ def remove_from_favorites(book_id):
 
 
 @views.route('/book/<book_id>/comments', methods=['POST'])
-@role_required('user')
+@role_required(['user', 'admin'])
 def add_comment(book_id):
     user_id = session.get('user_id')
     content = request.form.get('content')
@@ -197,11 +326,20 @@ def edit_comment(book_id, comment_id):
 
 
 @views.route('/books/<int:book_id>/comments/<int:comment_id>/delete', methods=['POST'])
-@role_required('user')
+@role_required(['user', 'admin'])
 def delete_comment(book_id, comment_id):
     message, status = comment_controllers.delete_comment_service(comment_id)
     flash(message, category="success" if status == 200 else "error")
     return redirect(request.referrer)
+
+
+@views.route('/admin/dashboard', methods=['GET'])
+@role_required('admin')
+def dashboard():
+    total_users = user_controllers.get_all_users_service().count
+    total_books = book_controllers.get_all_books_service().count
+    total_categories = category_controllers.get_all_categories_service().count
+    return render_template('admin/dashboard.html', total_users=total_users, total_books=total_books, total_categories=total_categories)
 
 
 @views.app_errorhandler(401)

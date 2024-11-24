@@ -2,31 +2,72 @@ from flask import request, flash
 from ..db import db
 from ..models import Users
 from werkzeug.utils import secure_filename
+from flask_bcrypt import Bcrypt
 import os
+bcrypt = Bcrypt()
+
+ALLOWED_COVER_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+AVATAR_UPLOAD_FOLDER = os.path.join("website", "static", "avatars")
+
+
+def allowed_cover_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_COVER_EXTENSIONS
 
 
 def add_user_service():
     data = request.form
+    avatar = request.files.get('avatar')
     errors = []
-    if not data.get('fullname') or not data.get('username') or not data.get('email') or not data.get('password'):
-        errors.append("All fields are required.")
+
+    # Kiểm tra các trường bắt buộc
+    required_fields = ['fullname', 'username', 'email', 'password']
+    for field in required_fields:
+        if not data.get(field):
+            errors.append(f"{field} is required.")
+
+    # Kiểm tra định dạng ảnh đại diện
+    if avatar and not allowed_cover_file(avatar.filename):
+        errors.append(
+            "Invalid avatar file format. Allowed formats: png, jpg, jpeg, gif.")
+
+    # Trả về lỗi nếu có
     if errors:
         return {"errors": errors}, 400
 
     try:
+        # Xử lý ảnh đại diện (nếu có)
+        avatar_filename = None
+        if avatar:
+            # Đảm bảo thư mục lưu ảnh tồn tại
+            os.makedirs(AVATAR_UPLOAD_FOLDER, exist_ok=True)
+
+            # Lưu ảnh vào thư mục
+            avatar_filename = secure_filename(avatar.filename)
+            avatar_path = os.path.join(AVATAR_UPLOAD_FOLDER, avatar_filename)
+            avatar.save(avatar_path)
+
+        hashed_password = bcrypt.generate_password_hash(
+            data['password']).decode('utf-8')
+        # Tạo đối tượng người dùng mới
         new_user = Users(
             fullname=data['fullname'],
             username=data['username'],
             email=data['email'],
-            password=data['password']
+            # Cần mã hóa mật khẩu trước khi lưu
+            password=hashed_password,
+            avatar=f"avatars/{avatar_filename}" if avatar else None
         )
+
+        # Thêm vào database
         db.session.add(new_user)
         db.session.commit()
         flash("User added successfully", "success")
         return "", 200
     except Exception as e:
+        # Rollback nếu xảy ra lỗi
         db.session.rollback()
-        return {"error": str(e)}, 500
+        flash(f"Failed to add user: {str(e)}", "error")
+        return {"error": "An error occurred while adding the user."}, 500
 
 
 def get_all_users_service():
@@ -42,28 +83,57 @@ def get_user_by_id_service(id: int):
 
 
 def update_user_service(id: int):
+    # Lấy thông tin người dùng từ database
     user = Users.query.get(id)
     if not user:
         return {"error": "User not found"}, 404
 
-    data = request.form  # Use form data
-    errors = []
-    if 'fullname' not in data or 'username' not in data or 'email' not in data:
-        errors.append("Required fields are missing.")
-    if errors:
-        return {"errors": errors}, 400
+    data = request.form
+    avatar = request.files.get('avatar')
+
+    # Kiểm tra các trường bắt buộc
+    if not data.get('fullname') or not data.get('email'):
+        return {"error": "Missing required fields: fullname or email."}, 400
+
+    # Kiểm tra định dạng ảnh đại diện (nếu có)
+    if avatar and not allowed_cover_file(avatar.filename):
+        return {"error": "Invalid avatar file format. Allowed: png, jpg, jpeg, gif."}, 400
 
     try:
-        for key, value in data.items():
-            if hasattr(user, key):
-                setattr(user, key, value)
+        # Cập nhật thông tin cơ bản
+        user.fullname = data['fullname']
+        user.email = data['email']
+        is_active = data.get('is_active')  # Lấy giá trị của 'is_active'
 
+        if is_active == '1':
+            user.is_active = 1
+        else:
+            user.is_active = 0
+        if avatar:
+            # Đảm bảo thư mục lưu ảnh tồn tại
+            os.makedirs(AVATAR_UPLOAD_FOLDER, exist_ok=True)
+
+            # Lưu ảnh với tên an toàn
+            avatar_filename = secure_filename(avatar.filename)
+            avatar_path = os.path.join(AVATAR_UPLOAD_FOLDER, avatar_filename)
+            avatar.save(avatar_path)
+
+            # Cập nhật đường dẫn ảnh trong cơ sở dữ liệu
+            user.avatar = f"avatars/{avatar_filename}"
+
+        # Cập nhật vai trò (role) nếu có trong request
+        if 'role' in data:
+            user.role = data['role']
+
+        # Lưu thay đổi vào cơ sở dữ liệu
         db.session.commit()
         flash("User updated successfully", "success")
         return "", 200
     except Exception as e:
+        # Rollback nếu có lỗi
         db.session.rollback()
-        return {"error": str(e)}, 500
+        flash(f"Failed to update user: {str(e)}", "error")
+        return {"error": "An error occurred while updating the user."}, 500
 
 
 def delete_user_service(id: int):

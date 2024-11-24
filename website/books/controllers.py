@@ -1,32 +1,84 @@
+from flask import request, flash
 from flask import send_file, request, jsonify, abort, flash
 from ..db import db
+from werkzeug.utils import secure_filename
 from ..library_ma import BookSchema
 from ..models import Books
 from sqlalchemy.exc import IntegrityError
 import os
 
-book_schema = BookSchema()
-books_schema = BookSchema(many=True)
+ALLOWED_COVER_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_PDF_EXTENSIONS = {'pdf'}
+
+# Hàm kiểm tra tệp ảnh bìa hợp lệ
+
+
+def allowed_cover_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_COVER_EXTENSIONS
+
+# Hàm kiểm tra tệp PDF hợp lệ
+
+
+def allowed_pdf_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_PDF_EXTENSIONS
 
 
 def add_book_service():
     # Lấy dữ liệu từ form
     title = request.form.get('title')
-    category_id = request.form.get('category_id')
+    category_id = request.form.get('category')
     publish_year = request.form.get('publish_year')
     author = request.form.get('author')
     publisher = request.form.get('publisher')
     summary = request.form.get('summary')
-    cover = request.form.get('cover')
-    file_path = request.form.get('file_path')
+    cover = request.files.get('cover')
+    pdf = request.files.get('pdf')
+    cover_path = None
+    pdf_path = None
 
-    # Kiểm tra dữ liệu từ form (có thể thêm các điều kiện kiểm tra dữ liệu)
+    # Kiểm tra dữ liệu bắt buộc
     if not all([title, category_id, publish_year, author, publisher]):
         flash("All fields are required", "error")
-        # return redirect(url_for('add_book'))
+        return "", 400
+
+    # Đảm bảo thư mục tồn tại
+    cover_dir = os.path.join('website', 'static', 'books', 'covers')
+    pdf_dir = os.path.join('website', 'static', 'books', 'pdfs')
+
+    if not os.path.exists(cover_dir):
+        os.makedirs(cover_dir)
+    if not os.path.exists(pdf_dir):
+        os.makedirs(pdf_dir)
+
+    # Xử lý file cover nếu có
+    if cover and allowed_cover_file(cover.filename):
+        try:
+            cover_filename = secure_filename(
+                cover.filename)  # Làm sạch tên file
+            cover_path = os.path.join(cover_dir, cover_filename)
+            cover.save(cover_path)
+            # Lưu đường dẫn trong cơ sở dữ liệu
+            cover_path = os.path.join(
+                'books', 'covers', cover_filename).replace(os.sep, '/')
+        except Exception as e:
+            flash(f"Failed to upload cover image: {str(e)}", "error")
+            return "", 500
+
+    # Xử lý file PDF nếu có
+    if pdf and allowed_pdf_file(pdf.filename):
+        try:
+            pdf_filename = secure_filename(pdf.filename)  # Làm sạch tên file
+            pdf_path = os.path.join(pdf_dir, pdf_filename)
+            pdf.save(pdf_path)
+            # Lưu đường dẫn trong cơ sở dữ liệu
+            pdf_path = os.path.join(
+                'books', 'pdfs', pdf_filename).replace(os.sep, '/')
+        except Exception as e:
+            flash(f"Failed to upload PDF file: {str(e)}", "error")
+            return "", 500
 
     try:
-        # Tạo mới một cuốn sách từ dữ liệu form
+        # Lưu sách vào cơ sở dữ liệu
         new_book = Books(
             category_id=category_id,
             title=title,
@@ -34,21 +86,22 @@ def add_book_service():
             author=author,
             publisher=publisher,
             summary=summary,
-            cover=cover,
-            file_path=file_path
+            cover=cover_path,
+            file_path=pdf_path
         )
-
         db.session.add(new_book)
         db.session.commit()
 
         flash("Book added successfully", "success")
-
+        return "", 201
     except IntegrityError:
         db.session.rollback()
         flash("Book with this title already exists", "error")
+        return "", 400
     except Exception as e:
         db.session.rollback()
         flash(f"An unexpected error occurred: {str(e)}", "error")
+        return "", 500
 
 
 def get_book_by_id_service(id):
@@ -116,44 +169,74 @@ def update_book_service(id: int):
     book = Books.query.get(id)
     if not book:
         flash("Book not found", "error")
-        # Chuyển hướng về danh sách sách nếu không tìm thấy sách
-        # return redirect(url_for('views.books'))
+        return "", 404
 
     # Lấy dữ liệu từ form
     title = request.form.get('title')
-    category_id = request.form.get('category_id')
+    category_id = request.form.get('category')
     publish_year = request.form.get('publish_year')
     author = request.form.get('author')
     publisher = request.form.get('publisher')
     summary = request.form.get('summary')
-    cover = request.form.get('cover')
-    file_path = request.form.get('file_path')
+    cover = request.files.get('cover')
+    pdf = request.files.get('pdf')
 
-    # Kiểm tra dữ liệu từ form (có thể thêm các điều kiện kiểm tra dữ liệu)
+    # Kiểm tra dữ liệu bắt buộc
     if not all([title, category_id, publish_year, author, publisher]):
         flash("All fields are required", "error")
-        # return redirect(url_for('update_book', id=id))  # Chuyển hướng lại trang sửa nếu thiếu trường dữ liệu
+        return "", 400
+
+    # Cập nhật thông tin cơ bản
+    book.title = title
+    book.category_id = category_id
+    book.publish_year = publish_year
+    book.author = author
+    book.publisher = publisher
+    book.summary = summary
+
+    # Xử lý file cover nếu có
+    if cover and allowed_cover_file(cover.filename):
+        try:
+            cover_dir = os.path.join('website', 'static', 'books', 'covers')
+            os.makedirs(cover_dir, exist_ok=True)
+
+            cover_filename = secure_filename(cover.filename)
+            cover_path = os.path.join(cover_dir, cover_filename)
+            cover.save(cover_path)
+
+            # Lưu đường dẫn mới trong DB
+            book.cover = os.path.join(
+                'books', 'covers', cover_filename).replace(os.sep, '/')
+        except Exception as e:
+            flash(f"Failed to upload cover image: {str(e)}", "error")
+            return "", 500
+
+    # Xử lý file PDF nếu có
+    if pdf and allowed_pdf_file(pdf.filename):
+        try:
+            pdf_dir = os.path.join('website', 'static', 'books', 'pdfs')
+            os.makedirs(pdf_dir, exist_ok=True)
+
+            pdf_filename = secure_filename(pdf.filename)
+            pdf_path = os.path.join(pdf_dir, pdf_filename)
+            pdf.save(pdf_path)
+
+            # Lưu đường dẫn mới trong DB
+            book.file_path = os.path.join(
+                'books', 'pdfs', pdf_filename).replace(os.sep, '/')
+        except Exception as e:
+            flash(f"Failed to upload PDF file: {str(e)}", "error")
+            return "", 500
 
     try:
-        # Cập nhật thông tin sách
-        book.title = title
-        book.category_id = category_id
-        book.publish_year = publish_year
-        book.author = author
-        book.publisher = publisher
-        book.summary = summary
-        book.cover = cover
-        book.file_path = file_path
-
+        # Lưu thay đổi vào cơ sở dữ liệu
         db.session.commit()
-
         flash("Book updated successfully", "success")
-        # return redirect(url_for('view_books'))  # Chuyển hướng về danh sách sách sau khi sửa thành công
-
+        return "", 200
     except Exception as e:
         db.session.rollback()
         flash(f"An unexpected error occurred: {str(e)}", "error")
-        # return redirect(url_for('update_book', id=id))  # Chuyển hướng lại trang sửa nếu có lỗi
+        return "", 500
 
 
 def delete_book_service(id: int):
@@ -164,8 +247,10 @@ def delete_book_service(id: int):
     try:
         db.session.delete(book)
         db.session.commit()
-        return jsonify({"message": "Book deleted successfully"}), 200
+        flash("Book deleted successfully", "success")
+        return "", 200
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash("Failed to delete book", "error")
+        return "", 500

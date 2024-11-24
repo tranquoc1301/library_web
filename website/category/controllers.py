@@ -1,107 +1,134 @@
-from flask import request, jsonify, abort
+from flask import request, flash, redirect, url_for
+from werkzeug.utils import secure_filename
 from ..db import db
-from ..library_ma import CategorySchema
 from ..models import Category
 from sqlalchemy.exc import IntegrityError
+import os
 
-category_schema = CategorySchema()
-categories_schema = CategorySchema(many=True)
+# Định dạng file ảnh cho phép
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+UPLOAD_FOLDER = 'website/static/category'  # Thư mục lưu trữ ảnh
 
 
-from flask import render_template, request, redirect, url_for, flash
-from ..db import db
-from ..models import Category
+def allowed_cover_file(filename):
+    """Kiểm tra định dạng file ảnh có hợp lệ không"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 
 def add_category_service():
-    # Lấy dữ liệu từ form
+    """Thêm một danh mục mới"""
     category_name = request.form.get('category')
-    image = request.form.get('image')
+    image = request.files.get('image')  # Đảm bảo lấy file ảnh từ form
 
-    # Kiểm tra nếu thiếu trường bắt buộc
     if not category_name:
         flash("Category name is required", "error")
-        # return redirect(url_for('add_category'))  # Quay lại trang thêm danh mục
+        return redirect(url_for('views.admin_categories'))  # Redirect directly
 
+    if image and not allowed_cover_file(image.filename):
+        flash("Invalid image format. Allowed formats: png, jpg, jpeg, gif.", "error")
+        return "", 400  # Return directly on error
     try:
         # Kiểm tra nếu danh mục đã tồn tại
-        existing_category = Category.query.filter_by(category=category_name).first()
+        existing_category = Category.query.filter_by(
+            category=category_name).first()
         if existing_category:
             flash("Category already exists", "error")
-            # return redirect(url_for('add_category'))  # Quay lại trang thêm danh mục
+            # Redirect directly
+            return "", 400
+        # Lưu ảnh vào thư mục
+        image_filename = None
+        if image:
+            image_filename = secure_filename(image.filename)
+            image_path = os.path.join(UPLOAD_FOLDER, image_filename)
+            image.save(image_path)
 
-        # Tạo mới danh mục
+        # Tạo và lưu danh mục mới
         new_category = Category(
             category=category_name,
-            image=image
+            image=f"category/{image_filename}" if image_filename else None
         )
-
         db.session.add(new_category)
         db.session.commit()
 
         flash("Category added successfully", "success")
-        # return redirect(url_for('views.categories'))  # Quay về trang danh sách danh mục
-
+        # Redirect after success
+        return "", 201
+    except IntegrityError:
+        db.session.rollback()
+        flash("Category with this name already exists.", "error")
+        return "", 400
     except Exception as e:
         db.session.rollback()
         flash(f"An unexpected error occurred: {str(e)}", "error")
-        # return redirect(url_for('add_category'))  # Quay lại trang thêm danh mục nếu có lỗi
-
+        # Redirect on general error
+        return "", 500
 
 
 def get_all_categories_service():
-    categories = Category.query.all()
-    return categories  # Trả về danh sách danh mục cho template
+    """Lấy tất cả danh mục"""
+    return Category.query.all()
 
 
 def get_category_by_id_service(category_id: int):
-    category = Category.query.get(category_id)
-    if not category:
-        abort(404, description="Category not found")
-    return category  # Trả về đối tượng danh mục cho template
-
-
-def update_category_service(category_id: int):
+    """Lấy danh mục theo ID"""
     category = Category.query.get(category_id)
     if not category:
         flash("Category not found", "error")
-        # return redirect(url_for('view_categories'))  # Quay lại trang danh sách danh mục
+    return category
 
-    # Lấy dữ liệu từ form
+
+def update_category_service(category_id: int):
+    """Cập nhật thông tin danh mục"""
+    category = Category.query.get(category_id)
+    if not category:
+        flash("Category not found", "error")
+        return "", 404
+
     category_name = request.form.get('category')
-    image = request.form.get('image')
+    image = request.files.get('image')
 
-    # Kiểm tra nếu thiếu trường bắt buộc
     if not category_name:
         flash("Category name is required", "error")
-        # return redirect(url_for('edit_category', category_id=category_id))  # Quay lại trang chỉnh sửa
+        return "", 400
 
     try:
         # Cập nhật thông tin danh mục
         category.category = category_name
-        category.image = image
+
+        if image:
+            if not allowed_cover_file(image.filename):
+                flash(
+                    "Invalid image format. Allowed formats: png, jpg, jpeg, gif.", "error")
+                return redirect(url_for('views.admin_categories'))
+
+            image_filename = secure_filename(image.filename)
+            image_path = os.path.join(UPLOAD_FOLDER, image_filename)
+            image.save(image_path)
+            # Lưu đường dẫn đúng vào DB
+            category.image = f"category/{image_filename}"
 
         db.session.commit()
 
         flash("Category updated successfully", "success")
-        # return redirect(url_for('view_categories'))  # Quay lại trang danh sách danh mục
-
+        return "", 200
     except Exception as e:
         db.session.rollback()
         flash(f"An unexpected error occurred: {str(e)}", "error")
-        # return redirect(url_for('edit_category', category_id=category_id))  # Quay lại trang chỉnh sửa nếu có lỗi
+        return "", 500
 
 
 def delete_category_service(category_id: int):
+    """Xóa danh mục"""
     category = Category.query.get(category_id)
     if not category:
-        abort(404, description="Category not found")
-
+        flash("Category not found", "error")
+        return "", 404
     try:
         db.session.delete(category)
         db.session.commit()
-        return jsonify({"message": "Category deleted successfully"}), 200
-
+        flash("Category deleted successfully", "success")
+        return "", 200
     except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An unexpected error occurred", "details": str(e)}), 500
+        flash(f"An unexpected error occurred: {str(e)}", "error")
+        return "", 500
