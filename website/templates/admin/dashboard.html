@@ -17,23 +17,101 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css"
     />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/sidebar.css') }}"
-    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+      }
+      .card-stats {
+        border-radius: 12px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #ffffff, #f1f1f1);
+      }
+      .card-stats:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      }
+      .card-stats .icon {
+        font-size: 3rem;
+        color: rgba(0, 0, 0, 0.1);
+      }
+      .card-stats .card-body {
+        padding: 20px 25px;
+      }
+      .card-stats h5 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .chart-container {
+        margin-top: 40px;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+      }
+      h2 {
+        font-weight: bold;
+        color: #495057;
+      }
+    </style>
   </head>
   <body>
-    <!-- Include Sidebar -->
     {% include 'admin/sidebar.html' %}
-
-    <!-- Main Content Area -->
-    <div id="main-content" class="flex-grow-1" style="padding-left: 260px">
-      <!-- Default content when no content is loaded -->
-      <h2>Welcome to the Admin Dashboard</h2>
-      <p>Select an option from the sidebar to load content dynamically.</p>
+    <div
+      id="main-content"
+      class="flex-grow-1"
+      style="padding-left: 260px; padding-top: 20px"
+    >
+      <div class="container-fluid">
+        <h2 class="mb-4">Admin Dashboard</h2>
+        <!-- Statistics Cards -->
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card card-stats bg-light">
+              <div class="card-body d-flex align-items-center">
+                <div>
+                  <h5 class="card-title text-primary">Total Users</h5>
+                  <h1 class="text-dark">{{ total_users }}</h1>
+                  <p class="text-muted">Registered users</p>
+                </div>
+                <div class="ms-auto icon text-primary">
+                  <i class="fa fa-users"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card card-stats bg-light">
+              <div class="card-body d-flex align-items-center">
+                <div>
+                  <h5 class="card-title text-success">Total Books</h5>
+                  <h1 class="text-dark">{{ total_books }}</h1>
+                  <p class="text-muted">Available books</p>
+                </div>
+                <div class="ms-auto icon text-success">
+                  <i class="fa fa-book"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card card-stats bg-light">
+              <div class="card-body d-flex align-items-center">
+                <div>
+                  <h5 class="card-title text-warning">Total Categories</h5>
+                  <h1 class="text-dark">{{ total_categories }}</h1>
+                  <p class="text-muted">Categories listed</p>
+                </div>
+                <div class="ms-auto icon text-warning">
+                  <i class="fa fa-list-alt"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
-
-    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
   </body>
 </html>

@@ -80,7 +80,7 @@
           </small>
         </div>
       </div>
-      {% if g.user and g.user.id == comment.user_id %}
+      {% if g.user and g.user.id == comment.user_id or g.user.role == 'admin'%}
       <div class="dropdown">
         <i
           class="fa-solid fa-ellipsis-vertical"

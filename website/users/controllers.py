@@ -55,7 +55,7 @@ def add_user_service():
             email=data['email'],
             # Cần mã hóa mật khẩu trước khi lưu
             password=hashed_password,
-            avatar=f"avatars/{avatar_filename}" if avatar else None
+            avatar=f"avatars/{avatar_filename}" if avatar else "avatars/user.png" 
         )
 
         # Thêm vào database
