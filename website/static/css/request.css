@@ -1,0 +1,76 @@
+/* Add button */
+.btn-add-request {
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+/* Request items */
+.request-item {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+}
+
+.request-item:hover {
+  background-color: #f1f1f1;
+  transition: background-color 0.2s;
+}
+
+/* Request title */
+.request-title {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Request description */
+.request-description {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Edit and delete buttons */
+.btn-edit-request {
+  margin-right: 5px;
+}
+
+.btn-delete-request {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.btn-delete-request:hover {
+  background-color: #c82333;
+}
+
+/* Alert message */
+.alert {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Thay đổi độ rộng của các cột */
+.description-column {
+  width: 50%; /* Cột Description chiếm 50% chiều rộng bảng */
+}
+
+.actions-column {
+  width: 20%; /* Cột Actions sẽ chiếm ít không gian hơn */
+}
+
+.approve-column {
+  width: 20%; /* Cột Approve chiếm không gian vừa đủ */
+}
+
+/* Đảm bảo các cột được căn giữa và nhìn gọn gàng */
+td {
+  vertical-align: middle;
+}
+
+/* Điều chỉnh một số chi tiết trong bảng */
+.table th,
+.table td {
+  text-align: center;
+}

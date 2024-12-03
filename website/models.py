@@ -106,19 +106,21 @@ class Favorites(db.Model):
         self.user_id = user_id
 
 
-class Ratings(db.Model):
-    __tablename__ = 'ratings'
+class Request(db.Model):
+    __tablename__ = 'request'
 
     id = db.Column(db.Integer, primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    created_on = db.Column(db.TIMESTAMP, nullable=True,
+    book_title = db.Column(db.String(255), nullable=False)
+    book_description = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.TIMESTAMP, nullable=True,
                            server_default=db.func.current_timestamp())
-    updated_on = db.Column(db.TIMESTAMP, nullable=True, server_default=db.func.current_timestamp(
+    updated_at = db.Column(db.TIMESTAMP, nullable=True, server_default=db.func.current_timestamp(
     ), onupdate=db.func.current_timestamp())
+    is_approved = db.Column(db.Boolean, nullable=True)
 
-    def __init__(self, book_id, user_id, rating):
-        self.book_id = book_id
+    def __init__(self, user_id, book_title, book_description, is_approved=None):
         self.user_id = user_id
-        self.rating = rating
+        self.book_title = book_title
+        self.book_description = book_description
+        self.is_approved = is_approved

@@ -142,6 +142,14 @@
                     <i class="fa-solid fa-star me-2"></i> Favorites
                   </a>
                 </li>
+                <li>
+                  <a
+                    class="dropdown-item d-flex align-items-center text-light"
+                    href="{{ url_for('views.requests', user_id=session['user_id']) }}"
+                  >
+                    <i class="fa-solid fa-code-pull-request me-2"></i>Request Book
+                  </a>
+                </li>
                 {% endif %}
                 <li>
                   <a

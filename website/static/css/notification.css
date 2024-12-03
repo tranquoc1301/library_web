@@ -1,0 +1,93 @@
+
+
+.notifications-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-size: 15px;
+  line-height: 1.5;
+  transition: all 0.5s ease-in-out;
+}
+
+.alert .icon-container {
+  font-size: 22px;
+  margin-right: 15px;
+}
+
+.alert .btn-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  opacity: 0.7;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.alert .btn-close:hover {
+  opacity: 1;
+}
+
+.alert .message-content {
+  flex-grow: 1;
+  color: #333;
+}
+
+/* Success notification styles */
+.alert-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.alert-success .icon-container {
+  color: #2e7d32;
+}
+
+/* Danger notification styles */
+.alert-danger {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.alert-danger .icon-container {
+  color: #c62828;
+}
+
+/* Info notification styles */
+.alert-info {
+  background: #e3f2fd;
+  color: #0277bd;
+}
+
+.alert-info .icon-container {
+  color: #0277bd;
+}
+
+/* Warning notification styles */
+.alert-warning {
+  background: #fff8e1;
+  color: #f57c00;
+}
+
+.alert-warning .icon-container {
+  color: #f57c00;
+}
+
+.fade-out {
+  opacity: 0;
+  transform: translateY(20px);
+}

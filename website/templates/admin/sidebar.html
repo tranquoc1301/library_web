@@ -68,6 +68,15 @@
           <span>Categories</span>
         </a>
       </li>
+      <li class="nav-item">
+        <a
+          class="nav-link d-flex align-items-center"
+          href="{{ url_for('views.admin_requests') }}"
+          onclick="loadContent('/admin/requests')"
+        >
+          <i class="fas fa-code-branch nav-icon"></i>
+          <span>Requests</span>
+        </a>
       <li class="nav-item logout">
         <a
           class="nav-link d-flex align-items-center"

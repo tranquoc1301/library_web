@@ -5,6 +5,7 @@ from .category import controllers as category_controllers
 from .users import controllers as user_controllers
 from .favorites import controllers as favorite_controllers
 from .comments import controllers as comment_controllers
+from .request import controllers as request_controllers
 from .services.authorize import role_required
 from .db import db
 
@@ -332,6 +333,73 @@ def remove_from_favorites(book_id):
     flash(message, category='success' if status == 200 else 'error')
     return redirect(request.referrer)
 
+# Request Book
+
+
+@views.route('/admin/request', methods=['GET'])
+@role_required('admin')
+def admin_requests():
+    book_requests = request_controllers.get_all_requests_service()
+    return render_template('admin/request_book.html', requests=book_requests)
+
+
+@views.route('/admin/request/<int:request_id>/approve', methods=['POST'])
+@role_required('admin')
+def approve_request(request_id):
+    message, status = request_controllers.approve_request_service(request_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/admin/request/<int:request_id>/reject', methods=['POST'])
+@role_required('admin')
+def reject_request(request_id):
+    message, status = request_controllers.reject_request_service(request_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/user/requests', methods=['GET'])
+@role_required('user')
+def requests():
+    user_id = session.get('user_id')
+    requests = request_controllers.get_requests_by_user_id_service(user_id)
+    return render_template('user/request_book.html', requests=requests)
+
+
+@views.route('/user/requests/create', methods=['POST'])
+@role_required('user')
+def add_request():
+    user_id = session.get('user_id')
+    message, status = request_controllers.add_request_service(user_id=user_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
+
+
+@views.route('/user/requests/<int:request_id>/update', methods=['POST'])
+@role_required('user')
+def update_request(request_id):
+    user_id = session.get('user_id')
+
+    # Kiểm tra dữ liệu
+    if not user_id:
+        flash("Unauthorized access", "error")
+        return redirect(request.referrer or url_for('views.requests'))
+
+    # Gọi service để cập nhật
+    message, status = request_controllers.update_request_service(
+        request_id=request_id, user_id=user_id
+    )
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer or url_for('views.requests'))
+
+
+@views.route('/user/requests/<int:request_id>/delete', methods=['POST'])
+@role_required('user')
+def delete_request(request_id):
+    message, status = request_controllers.delete_request_service(request_id)
+    flash(message, category='success' if status == 200 else 'error')
+    return redirect(request.referrer)
 # Error handler
 
 
