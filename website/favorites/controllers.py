@@ -29,7 +29,7 @@ def add_favorite_service(book_id, user_id):
 
     except Exception as e:
         db.session.rollback()
-        flash("Failed to add book to favorites", "error")
+        flash("Failed to add book to favorites", "danger")
         return f"An unexpected error occurred: {str(e)}", 500
 
 
@@ -66,5 +66,5 @@ def delete_favorite_book_service(book_id: int, user_id: int):
         return "", 200
     except Exception as e:
         db.session.rollback()
-        flash("Failed to delete favorite book", "error")
+        flash("Failed to delete favorite book", "danger")
         return f"An unexpected error occurred: {str(e)}", 500

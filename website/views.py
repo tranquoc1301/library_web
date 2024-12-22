@@ -160,7 +160,7 @@ def download_book(book_id):
 def add_book():
     message, status = book_controllers.add_book_service()
 
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -168,7 +168,7 @@ def add_book():
 @role_required('admin')
 def update_book(book_id):
     message, status = book_controllers.update_book_service(book_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -176,7 +176,7 @@ def update_book(book_id):
 @role_required('admin')
 def delete_book(book_id):
     message, status = book_controllers.delete_book_service(book_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -204,7 +204,7 @@ def admin_categories():
 @role_required('admin')
 def add_category():
     message, status = category_controllers.add_category_service()
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -212,7 +212,7 @@ def add_category():
 @role_required('admin')
 def update_category(category_id):
     message, status = category_controllers.update_category_service(category_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -220,7 +220,7 @@ def update_category(category_id):
 @role_required('admin')
 def delete_category(category_id):
     message, status = category_controllers.delete_category_service(category_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 # User profile route
@@ -251,7 +251,7 @@ def admin_users():
 @role_required('admin')
 def add_user():
     message, status = user_controllers.add_user_service()
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -259,7 +259,7 @@ def add_user():
 @role_required('admin')
 def update_user(user_id):
     message, status = user_controllers.update_user_service(user_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -267,7 +267,7 @@ def update_user(user_id):
 @role_required('admin')
 def delete_user(user_id):
     message, status = user_controllers.delete_user_service(user_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -285,7 +285,7 @@ def profile():
 def upload_avatar():
     user_id = session.get('user_id')
     message, status = user_controllers.upload_avatar_service(user_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 # Update profile route
 
@@ -295,7 +295,7 @@ def upload_avatar():
 def update_profile():
     user_id = session.get('user_id')
     message, status = user_controllers.update_user_service(user_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 # Favorite books route
@@ -318,7 +318,7 @@ def add_to_favorites(book_id):
     user_id = session.get('user_id')
     message, status = favorite_controllers.add_favorite_service(
         book_id, user_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 # Remove from favorites route
@@ -330,7 +330,7 @@ def remove_from_favorites(book_id):
     user_id = session.get('user_id')
     message, status = favorite_controllers.delete_favorite_book_service(
         book_id, user_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 # Request Book
@@ -347,7 +347,7 @@ def admin_requests():
 @role_required('admin')
 def approve_request(request_id):
     message, status = request_controllers.approve_request_service(request_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -355,7 +355,7 @@ def approve_request(request_id):
 @role_required('admin')
 def reject_request(request_id):
     message, status = request_controllers.reject_request_service(request_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -363,6 +363,9 @@ def reject_request(request_id):
 @role_required('user')
 def requests():
     user_id = session.get('user_id')
+    if (user_controllers.get_user_by_id_service(user_id).is_active == False):
+        flash("Your account is not activated. Please activate your account in Profile to use this feature.", category="warning")
+        return (redirect(request.referrer))
     requests = request_controllers.get_requests_by_user_id_service(user_id)
     return render_template('user/request_book.html', requests=requests)
 
@@ -372,7 +375,7 @@ def requests():
 def add_request():
     user_id = session.get('user_id')
     message, status = request_controllers.add_request_service(user_id=user_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -383,14 +386,14 @@ def update_request(request_id):
 
     # Kiểm tra dữ liệu
     if not user_id:
-        flash("Unauthorized access", "error")
+        flash("Unauthorized access", "danger")
         return redirect(request.referrer or url_for('views.requests'))
 
     # Gọi service để cập nhật
     message, status = request_controllers.update_request_service(
         request_id=request_id, user_id=user_id
     )
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer or url_for('views.requests'))
 
 
@@ -398,7 +401,7 @@ def update_request(request_id):
 @role_required('user')
 def delete_request(request_id):
     message, status = request_controllers.delete_request_service(request_id)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 # Error handler
 
@@ -410,7 +413,7 @@ def add_comment(book_id):
     content = request.form.get('content')
     message, status = comment_controllers.add_comment_service(
         book_id, user_id, content)
-    flash(message, category='success' if status == 200 else 'error')
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 
@@ -420,7 +423,7 @@ def edit_comment(book_id, comment_id):
     content = request.form.get('content')
     message, status = comment_controllers.update_comment_service(
         comment_id, content)
-    flash(message, category="success" if status == 200 else "error")
+    flash(message, category="success" if status == 200 else "danger")
     return redirect(url_for('views.book_detail', book_id=book_id))
 
 
@@ -428,7 +431,7 @@ def edit_comment(book_id, comment_id):
 @role_required(['user', 'admin'])
 def delete_comment(book_id, comment_id):
     message, status = comment_controllers.delete_comment_service(comment_id)
-    flash(message, category="success" if status == 200 else "error")
+    flash(message, category='success' if status == 200 else 'danger')
     return redirect(request.referrer)
 
 

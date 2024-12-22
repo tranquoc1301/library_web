@@ -17,7 +17,7 @@ def add_comment_service(book_id, user_id, content):
         return "", 201
     except Exception as e:
         db.session.rollback()
-        flash("Failed to add comment", "error")
+        flash("Failed to add comment", "danger")
         return "", 500
 
 
@@ -56,7 +56,7 @@ def update_comment_service(id, content):
 
     except Exception as e:
         db.session.rollback()
-        flash("Failed to update comment", "error")
+        flash("Failed to update comment", "danger")
         return "", 500
 
 
@@ -73,5 +73,5 @@ def delete_comment_service(id):
 
     except Exception as e:
         db.session.rollback()
-        flash("Failed to delete comment", "error")
+        flash("Failed to delete comment", "danger")
         return "", 500

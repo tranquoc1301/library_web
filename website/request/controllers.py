@@ -42,7 +42,7 @@ def add_request_service(user_id):
 
     # Kiểm tra dữ liệu đầu vào
     if not user_id or not book_title or not book_description:
-        flash("All fields are required", "error")
+        flash("All fields are required", "danger")
         return "", 400
 
     try:
@@ -59,7 +59,7 @@ def add_request_service(user_id):
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error adding request: {e}")
-        flash("Failed to add request", "error")
+        flash("Failed to add request", "danger")
         return "", 500
 
 
@@ -109,7 +109,7 @@ def delete_request_service(id):
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error deleting request with ID {id}: {e}")
-        flash("Failed to delete request", "error")
+        flash("Failed to delete request", "danger")
         return "", 500
 
 
@@ -126,7 +126,7 @@ def approve_request_service(request_id):
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error approving request with ID {request_id}: {e}")
-        flash("Failed to approve request", "error")
+        flash("Failed to approve request", "danger")
         return "", 500
 
 
@@ -143,5 +143,5 @@ def reject_request_service(request_id):
     except Exception as e:
         db.session.rollback()
         logging.error(f"Error rejecting request with ID {request_id}: {e}")
-        flash("Failed to reject request", "error")
+        flash("Failed to reject request", "danger")
         return "", 500

@@ -53,10 +53,12 @@ def signup():
     avatar = "avatars/user.png"
 
     if password != confirm_password:
-        return jsonify({"error": "Passwords do not match."}), 400
+        flash('Passwords do not match. Please try again.', 'danger')
+        return "", 400
 
     if Users.query.filter_by(email=email).first():
-        return jsonify({"error": "Email already exists."}), 400
+        flash('Email already exists. Please use a different email.', 'danger')
+        return "", 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     new_user = Users(

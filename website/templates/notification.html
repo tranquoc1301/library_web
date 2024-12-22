@@ -2,6 +2,7 @@
   rel="stylesheet"
   href="{{ url_for('static', filename='css/notification.css') }}"
 />
+
 {% if get_flashed_messages() %}
 <div class="notifications-container">
   {% for category, message_content in get_flashed_messages(with_categories=true)
@@ -34,16 +35,14 @@
 {% endif %}
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", () => {
     const alerts = document.querySelectorAll(".alert");
 
-    alerts.forEach(function (alert) {
-      setTimeout(function () {
+    alerts.forEach((alert) => {
+      setTimeout(() => {
         alert.classList.add("fade-out");
-        setTimeout(function () {
-          alert.remove();
-        }, 1000);
-      }, 5000); // Notifications will remain visible for 5 seconds
+        setTimeout(() => alert.remove(), 1000);
+      }, 5000); // Notifications are visible for 5 seconds
     });
   });
 </script>

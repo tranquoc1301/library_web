@@ -38,7 +38,7 @@ def add_book_service():
 
     # Kiểm tra dữ liệu bắt buộc
     if not all([title, category_id, publish_year, author, publisher]):
-        flash("All fields are required", "error")
+        flash("All fields are required", "danger")
         return "", 400
 
     # Đảm bảo thư mục tồn tại
@@ -61,7 +61,7 @@ def add_book_service():
             cover_path = os.path.join(
                 'books', 'covers', cover_filename).replace(os.sep, '/')
         except Exception as e:
-            flash(f"Failed to upload cover image: {str(e)}", "error")
+            flash(f"Failed to upload cover image: {str(e)}", "danger")
             return "", 500
 
     # Xử lý file PDF nếu có
@@ -74,7 +74,7 @@ def add_book_service():
             pdf_path = os.path.join(
                 'books', 'pdfs', pdf_filename).replace(os.sep, '/')
         except Exception as e:
-            flash(f"Failed to upload PDF file: {str(e)}", "error")
+            flash(f"Failed to upload PDF file: {str(e)}", "danger")
             return "", 500
 
     try:
@@ -96,11 +96,11 @@ def add_book_service():
         return "", 201
     except IntegrityError:
         db.session.rollback()
-        flash("Book with this title already exists", "error")
+        flash("Book with this title already exists", "danger")
         return "", 400
     except Exception as e:
         db.session.rollback()
-        flash(f"An unexpected error occurred: {str(e)}", "error")
+        flash(f"An unexpected error occurred: {str(e)}", "danger")
         return "", 500
 
 
@@ -168,7 +168,7 @@ def search_books_service(title):
 def update_book_service(id: int):
     book = Books.query.get(id)
     if not book:
-        flash("Book not found", "error")
+        flash("Book not found", "danger")
         return "", 404
 
     # Lấy dữ liệu từ form
@@ -183,7 +183,7 @@ def update_book_service(id: int):
 
     # Kiểm tra dữ liệu bắt buộc
     if not all([title, category_id, publish_year, author, publisher]):
-        flash("All fields are required", "error")
+        flash("All fields are required", "danger")
         return "", 400
 
     # Cập nhật thông tin cơ bản
@@ -208,7 +208,7 @@ def update_book_service(id: int):
             book.cover = os.path.join(
                 'books', 'covers', cover_filename).replace(os.sep, '/')
         except Exception as e:
-            flash(f"Failed to upload cover image: {str(e)}", "error")
+            flash(f"Failed to upload cover image: {str(e)}", "danger")
             return "", 500
 
     # Xử lý file PDF nếu có
@@ -225,7 +225,7 @@ def update_book_service(id: int):
             book.file_path = os.path.join(
                 'books', 'pdfs', pdf_filename).replace(os.sep, '/')
         except Exception as e:
-            flash(f"Failed to upload PDF file: {str(e)}", "error")
+            flash(f"Failed to upload PDF file: {str(e)}", "danger")
             return "", 500
 
     try:
@@ -235,7 +235,7 @@ def update_book_service(id: int):
         return "", 200
     except Exception as e:
         db.session.rollback()
-        flash(f"An unexpected error occurred: {str(e)}", "error")
+        flash(f"An unexpected error occurred: {str(e)}", "danger")
         return "", 500
 
 
@@ -252,5 +252,5 @@ def delete_book_service(id: int):
 
     except Exception as e:
         db.session.rollback()
-        flash("Failed to delete book", "error")
+        flash("Failed to delete book", "danger")
         return "", 500

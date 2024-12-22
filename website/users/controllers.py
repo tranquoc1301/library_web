@@ -55,7 +55,7 @@ def add_user_service():
             email=data['email'],
             # Cần mã hóa mật khẩu trước khi lưu
             password=hashed_password,
-            avatar=f"avatars/{avatar_filename}" if avatar else "avatars/user.png" 
+            avatar=f"avatars/{avatar_filename}" if avatar else "avatars/user.png"
         )
 
         # Thêm vào database
@@ -66,7 +66,7 @@ def add_user_service():
     except Exception as e:
         # Rollback nếu xảy ra lỗi
         db.session.rollback()
-        flash(f"Failed to add user: {str(e)}", "error")
+        flash(f"Failed to add user: {str(e)}", "danger")
         return {"error": "An error occurred while adding the user."}, 500
 
 
@@ -93,11 +93,16 @@ def update_user_service(id: int):
 
     # Kiểm tra các trường bắt buộc
     if not data.get('fullname') or not data.get('email'):
-        return {"error": "Missing required fields: fullname or email."}, 400
+        flash("All fields are required", "danger")
+        return "", 400
+    if Users.query.filter_by(email=data['email']).first() and data['email'] != user.email:
+        flash("Email already exists", "danger")
+        return "", 400
 
     # Kiểm tra định dạng ảnh đại diện (nếu có)
     if avatar and not allowed_cover_file(avatar.filename):
-        return {"error": "Invalid avatar file format. Allowed: png, jpg, jpeg, gif."}, 400
+        flash("Invalid avatar file format - allowed: png, jpg, jpeg, gif", "danger")
+        return "", 400
 
     try:
         # Cập nhật thông tin cơ bản
@@ -132,8 +137,8 @@ def update_user_service(id: int):
     except Exception as e:
         # Rollback nếu có lỗi
         db.session.rollback()
-        flash(f"Failed to update user: {str(e)}", "error")
-        return {"error": "An error occurred while updating the user."}, 500
+        flash(f"Failed to update user: {str(e)}", "danger")
+        return "", 500
 
 
 def delete_user_service(id: int):
@@ -185,11 +190,11 @@ def upload_avatar_service(id: int):
 
     avatar = request.files.get('avatar')
     if not avatar or avatar.filename == '':
-        flash("Please select an avatar file.", "error")
+        flash("Please select an avatar file.", "danger")
         return "", 400
     if not allowed_file(avatar.filename):
         flash(
-            "Invalid file format. Only PNG, JPG, JPEG, and GIF files are allowed.", "error")
+            "Invalid file format. Only PNG, JPG, JPEG, and GIF files are allowed.", "danger")
         return "", 400
 
     filename = secure_filename(avatar.filename)
